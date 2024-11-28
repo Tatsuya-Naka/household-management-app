@@ -1,100 +1,96 @@
-import Image from "next/image";
+import Link from "next/link";
+import SavingsIcon from '@mui/icons-material/Savings';
+import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
+import IosShareOutlinedIcon from '@mui/icons-material/IosShareOutlined';
+import SportsBaseballOutlinedIcon from '@mui/icons-material/SportsBaseballOutlined';
+// import dataImage1 from "../../public/data1.png";
+import { Jaro, Poppins } from "next/font/google";
+import paths from "@/paths";
+import { cn } from "@/lib/utils";
 
-export default function Home() {
+const font_app_name = Jaro({
+  weight: "400",
+  style: ["normal"],
+  subsets: ["latin"],
+});
+
+const font_normal = Poppins({
+  weight: ["500"],
+  subsets: ["latin"],
+})
+
+export default function Default() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div>
+      <header className="min-h-screen bg-gradient-to-r from-slate-300 to-slate-500">
+        <div className="max-w-screen-xl flex-col items-center xl:mx-auto mx-5">
+          {/* nav */}
+          <nav className="w-full flex items-center justify-between py-2">
+            {/* Logo, name, sub, vol*/}
+            <div className="flex items-center">
+              <SavingsIcon sx={{ fontSize: 32, color: "white", marginRight: "1rem" }} />
+              <h1 className={cn("italic text-2xl font-[700] text-white mr-8", font_app_name.className)}>
+                HAB
+              </h1>
+              <h3 className={cn("sm:inline-block hidden text-base tracking-wide text-white font-[500] bg-black bg-opacity-20 rounded-xl px-2 py-1.5 font-mano", font_normal.className)}>
+                With your everyday life
+              </h3>
+            </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            {/* Loging, signin, color mode, share, sns(my github account) */}
+            <div className={cn("flex items-center font-mono", font_normal.className)}>
+              <Link
+                href={paths.logInUrl()}
+                className="mr-2 sm:text-base text-sm bg-transparent hover:underline underline-offset-4 text-white font-[700] transition duration-300 ease-in-out rounded-lg px-2 py-1 cursor-pointer"
+              >
+                Login
+              </Link>
+              <Link
+                href={paths.signInUrl()}
+                className="bg-white sm:text-base text-sm hover:bg-opacity-80 text-slate-500 font-[700] hover:underline hover:underline-offset-4 transition duration-300 ease-in-out sm:rounded-lg rounded-md sm:px-2 px-1 sm:py-1 py-0.5 cursor-pointer"
+              >
+                Signup
+              </Link>
+              <div className="bg-white w-0.5 h-[20px] mx-4 md:inline-block hidden" />
+              <div className="md:inline-block hidden bg-transparent mr-2 cursor-pointer hover:bg-white group rounded-full p-2 transition-all duration-300 ease-in-out">
+                <WbSunnyOutlinedIcon className="text-white group-hover:text-slate-500 " />
+              </div>
+              <button className="md:inline-block hidden bg-transparent mr-2 cursor-pointer hover:bg-white group rounded-full p-2 transition-all duration-300 ease-in-out">
+                <IosShareOutlinedIcon className="text-white group-hover:text-slate-500 " />
+              </button>
+              <Link href="https://github.com/Tatsuya-Naka" target="_blank" className="md:inline-block hidden bg-transparent cursor-pointer hover:bg-white group rounded-full p-2 transition-all duration-300 ease-in-out">
+                <SportsBaseballOutlinedIcon className="text-white group-hover:text-slate-500 " />
+              </Link>
+            </div>
+          </nav>
+
+          {/* Header content */}
+          <div className="bg-no-repeat bg-contain h-[220px]">
+            {/* <Image 
+                src={dataImage1}
+                alt="App description"
+                height={2000}
+                width={2000}
+                className="float-left max-h-[calc(100vh-50px)] max-w-[50%]"
+              /> */}
+            <div className="float-right">
+              <div className="flex items-center justify-center">
+                <h1 className="">
+
+                </h1>
+                <h3 className="">
+
+                </h3>
+              </div>
+            </div>
+          </div>
         </div>
+      </header>
+      <main className="bg-shinchan">
+        Thank you
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      <footer >
+
       </footer>
     </div>
   );
