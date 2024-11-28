@@ -14,6 +14,15 @@ const paths = {
     signInEmailUrl() {
         return "/new-user/email";
     },
+    registerInfoUrl() {
+        return "/new-user/register";
+    },
+    authPrefix() {
+        return "/api/auth";
+    },
+    errorUrl() {
+        return "/error";
+    },
 }
 
 export default paths;
