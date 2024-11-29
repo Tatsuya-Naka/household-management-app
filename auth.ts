@@ -10,6 +10,18 @@ export const { handlers: { GET, POST }, signIn, signOut, auth } = NextAuth({
         signIn: paths.logInUrl(),
         error: paths.errorUrl(),
     },
+    events: {
+        async linkAccount({user}) {
+            await db.user.update({
+                where: {
+                    id: user.id,
+                },
+                data: {
+                    emailVerified: new Date(),
+                }
+            })
+        }
+    },
     callbacks: {
         async session({ session, token }) {
             if (token.sub && session.user) {
