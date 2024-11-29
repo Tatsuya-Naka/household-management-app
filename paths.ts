@@ -23,6 +23,9 @@ const paths = {
     errorUrl() {
         return "/error";
     },
+    verificationEmail() {
+        return "/new-user/email/new-verification";
+    },
 }
 
 export default paths;

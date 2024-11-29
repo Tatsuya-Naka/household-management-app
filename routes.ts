@@ -3,6 +3,7 @@ import paths from "./paths";
 export const publicRoutes = [
     paths.default(),
     paths.errorUrl(),
+    paths.verificationEmail(),
 ]
 
 export const authRoutes = [
