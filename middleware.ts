@@ -13,26 +13,26 @@ export default middleware((req) => {
     const isAuthRoute = authRoutes.includes(nextUrl.pathname);
     const isSetAuthRoute = setAuthRoutes.includes(nextUrl.pathname);
     
-    // if (isApiAuthRoute) {
-    //     return;
-    // }
-    // if (isAuthRoute) {
-    //     if (isLoggedIn) {
-    //         return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
-    //     }
-    //     return;
-    // }
+    if (isApiAuthRoute) {
+        return;
+    }
+    if (isAuthRoute) {
+        if (isLoggedIn) {
+            return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+        }
+        return;
+    }
 
-    // if (isPublicRoute) {
-    //     if (isLoggedIn) {
-    //         return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
-    //     }
-    //     return;
-    // }
+    if (isPublicRoute) {
+        if (isLoggedIn) {
+            return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+        }
+        return;
+    }
 
-    // if (!isLoggedIn && !isPublicRoute) {
-    //     return Response.redirect(new URL(DEFAULT_REDIRECT, nextUrl));
-    // }
+    if (!isLoggedIn && !isPublicRoute) {
+        return Response.redirect(new URL(DEFAULT_REDIRECT, nextUrl));
+    }
     return;
 });
 
