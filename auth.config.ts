@@ -25,7 +25,6 @@ export default {
                         password,
                         existingUser.password,
                     );
-
                     if (passwordHashed) return existingUser;
                 }
                 return null;

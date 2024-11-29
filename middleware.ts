@@ -21,6 +21,14 @@ export default middleware((req) => {
         }
         return;
     }
+
+    if (isPublicRoute) {
+        if (isLoggedIn) {
+            return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+        }
+        return;
+    }
+
     if (!isLoggedIn && !isPublicRoute) {
         return Response.redirect(new URL(DEFAULT_REDIRECT, nextUrl));
     }
