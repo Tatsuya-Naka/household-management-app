@@ -6,8 +6,9 @@ import { FcGoogle } from "react-icons/fc";
 import { FaXTwitter } from "react-icons/fa6";
 import { FaApple } from "react-icons/fa";
 import SignInButton from './signin-button';
-// import { signIn } from "next-auth/react";
-// import { DEFAULT_SIGNIN_REDIRECT } from '@/route';
+import { signIn } from "next-auth/react";
+import { DEFAULT_SIGNIN_REDIRECT } from '@/routes';
+
 
 export default function SignInForm() {
     const getIcon = (id: string) => {
@@ -24,11 +25,10 @@ export default function SignInForm() {
     };
 
     const onClick = (provider: "google" | "twitter" | "apple") => {
-        console.log(provider);
-        // TODO: Signin With OAuth Provider Google, Twitter, and Apple
-        // signIn(provider, {
-        //     callbackUrl: DEFAULT_SIGNIN_REDIRECT,
-        // })
+        // TODO: If user is already signed in but visit here, they need to redirect to the home page not register info page.
+        signIn(provider, {
+            callbackUrl: DEFAULT_SIGNIN_REDIRECT,
+        })
     }
 
     return (

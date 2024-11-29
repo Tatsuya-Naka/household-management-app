@@ -3,6 +3,9 @@ import bcrypt from "bcryptjs";
 import { SignInSchema } from "@/schemas/signin";
 import { getUserByEmail } from "@/data/user";
 import { db } from "@/lib/db";
+import { AuthError } from "next-auth";
+import { signIn } from "@/auth";
+import { DEFAULT_SIGNIN_EMAIL_REDIRECT } from "@/routes";
 
 export interface SignInState {
     errors: {
@@ -61,7 +64,31 @@ export async function signin(formState: SignInState, formData: FormData): Promis
         }
     });
 
-    
+    try {
+        await signIn("credentials", {
+            email,
+            password,
+            redirectTo: DEFAULT_SIGNIN_EMAIL_REDIRECT,
+        })
+    } catch (err: unknown) {
+        if (err instanceof AuthError) {
+            switch (err.type) {
+                case "CredentialsSignin":
+                    return {
+                        errors: {
+                            _form: ["Invalid Credentials"]
+                        }
+                    };
+                default:
+                    return {
+                        errors: {
+                            _form: [err.message]
+                        }
+                    };
+            }
+        }
+        throw err;
+    }
 
     return {
         errors: {},

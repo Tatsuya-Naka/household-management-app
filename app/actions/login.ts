@@ -2,12 +2,9 @@
 
 import { signIn } from "@/auth";
 import { getUserByEmail } from "@/data/user";
-import paths from "@/paths";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { LogInSchema } from "@/schemas/login";
-import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
-import { redirect } from "next/navigation";
 
 export interface LoginState {
     errors: {
@@ -41,10 +38,18 @@ export async function login(formState: LoginState, formData: FormData): Promise<
 
     const existingUser = await getUserByEmail(email);
 
-    if (!existingUser) {
+    if (!existingUser || !existingUser.email) {
         return {
             errors: {
                 _form: ["You must signin first"]
+            }
+        };
+    }
+
+    if (!existingUser.password) {
+        return {
+            errors: {
+                _form: ["Invalid Credentials"]
             }
         };
     }
@@ -71,16 +76,10 @@ export async function login(formState: LoginState, formData: FormData): Promise<
                         }
                     }
             }
-        } else {
-            return {
-                errors: {
-                    _form: ["Something wrong"]
-                }
-            };
         }
+        // Should be throw an error instead of writing else: otherwise, I cannot redirect to the target page.
+        throw err;
     }
-
-    redirect(paths.home());
 
     return {
         errors: {},

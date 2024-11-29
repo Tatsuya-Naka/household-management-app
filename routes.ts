@@ -7,9 +7,12 @@ export const publicRoutes = [
 
 export const authRoutes = [
     paths.logInUrl(),
-    paths.registerInfoUrl(),
     paths.signInEmailUrl(),
     paths.signInUrl(),
+]
+
+export const setAuthRoutes = [
+    paths.registerInfoUrl(),
 ]
 
 export const API_AUTH_PREFIX = paths.authPrefix();

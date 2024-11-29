@@ -1,18 +1,17 @@
 import NextAuth from "next-auth";
-import {PrismaAdapter} from "@auth/prisma-adapter"
+import { PrismaAdapter } from "@auth/prisma-adapter"
 import { db } from "./lib/db";
 import authConfig from "./auth.config";
 import { getUserById } from "./data/user";
 import paths from "./paths";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const { handlers: { GET, POST }, signIn, signOut, auth } = NextAuth({
     pages: {
         signIn: paths.logInUrl(),
         error: paths.errorUrl(),
     },
     callbacks: {
-        async session({session, token}) {
-            console.log("Token: ", token);
+        async session({ session, token }) {
             if (token.sub && session.user) {
                 session.user.id = token.sub;
             }
@@ -22,10 +21,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             if (token.location && session.user) {
                 session.user.location = token.location as string;
             }
-            
+
             return session;
         },
-        async jwt({token}) {
+        async jwt({ token }) {
             if (!token.sub) return token;
             const existingUser = await getUserById(token.sub);
 
@@ -38,6 +37,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
     },
     adapter: PrismaAdapter(db),
-    session: {strategy: "jwt"},
+    session: { strategy: "jwt" },
     ...authConfig,
 })

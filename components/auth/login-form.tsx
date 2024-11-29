@@ -4,9 +4,9 @@ import { FaXTwitter } from "react-icons/fa6";
 import { FaApple } from "react-icons/fa";
 import * as actions from "../../app/actions";
 import LogInFormStatus from "./login-form-status";
-// import { signIn } from "next-auth/react";
-// import { DEFAULT_LOGIN_REDIRECT } from "@/route";
+import { signIn } from "next-auth/react";
 import { Suspense, useActionState } from "react";
+import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 
 export default function LogInForm() {
     const [formState, action] = useActionState(actions.login, { errors: {} });
@@ -14,9 +14,9 @@ export default function LogInForm() {
     const onClick = (provider: "google" | "twitter" | "apple") => {
         console.log(provider);
         // TODO: Activate OAuth providers: gogole, twitter, apple for signin
-        // signIn(provider, {
-        //     callbackUrl: DEFAULT_LOGIN_REDIRECT
-        // })
+        signIn(provider, {
+            callbackUrl: DEFAULT_LOGIN_REDIRECT
+        })
     };
 
     return (
