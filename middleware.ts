@@ -27,6 +27,7 @@ export default middleware((req) => {
     return;
 });
 
+// Do not miss to correctly handle the above
 export const config = {
     matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 }
