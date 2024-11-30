@@ -6,7 +6,8 @@ export const getVerificationTokenByToken = async(token: string) => {
             where: {
                 id: token,
             }
-        })
+        });
+        return verificationToken;
     } catch {
         return null;
     }

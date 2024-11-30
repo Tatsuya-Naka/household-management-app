@@ -4,15 +4,15 @@ import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import IosShareOutlinedIcon from '@mui/icons-material/IosShareOutlined';
 import SportsBaseballOutlinedIcon from '@mui/icons-material/SportsBaseballOutlined';
 // import dataImage1 from "../../public/data1.png";
-import { Jaro, Poppins } from "next/font/google";
+import { Poppins } from "next/font/google";
 import paths from "@/paths";
 import { cn } from "@/lib/utils";
 
-const font_app_name = Jaro({
-  weight: "400",
-  style: ["normal"],
-  subsets: ["latin"],
-});
+// const font_app_name = Jaro({
+//   weight: "400",
+//   style: ["normal"],
+//   subsets: ["latin"],
+// });
 
 const font_normal = Poppins({
   weight: ["500"],
@@ -29,7 +29,7 @@ export default function Default() {
             {/* Logo, name, sub, vol*/}
             <div className="flex items-center">
               <SavingsIcon sx={{ fontSize: 32, color: "white", marginRight: "1rem" }} />
-              <h1 className={cn("italic text-2xl font-[700] text-white mr-8", font_app_name.className)}>
+              <h1 className={cn("italic text-2xl font-[700] text-white mr-8")}>
                 HAB
               </h1>
               <h3 className={cn("sm:inline-block hidden text-base tracking-wide text-white font-[500] bg-black bg-opacity-20 rounded-xl px-2 py-1.5 font-mano", font_normal.className)}>

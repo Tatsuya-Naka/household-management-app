@@ -26,6 +26,9 @@ const paths = {
     verificationEmail() {
         return "/new-user/email/new-verification";
     },
+    verificationEmailSentPage() {
+        return "/new-user/email/confirm";
+    },
 }
 
 export default paths;

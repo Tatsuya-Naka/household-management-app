@@ -4,6 +4,7 @@ export const publicRoutes = [
     paths.default(),
     paths.errorUrl(),
     paths.verificationEmail(),
+    paths.verificationEmailSentPage(),
 ]
 
 export const authRoutes = [

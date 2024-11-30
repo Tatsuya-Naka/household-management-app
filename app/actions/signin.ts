@@ -8,6 +8,8 @@ import { db } from "@/lib/db";
 // import { DEFAULT_SIGNIN_EMAIL_REDIRECT } from "@/routes";
 import { generateVerificationToken } from "@/lib/token";
 import { sendVerificationEmail } from "@/lib/mail";
+import { redirect } from "next/navigation";
+import paths from "@/paths";
 
 export interface SignInState {
     errors: {
@@ -68,6 +70,8 @@ export async function signin(formState: SignInState, formData: FormData): Promis
 
     const verificationToken = await generateVerificationToken(email);
     await sendVerificationEmail(verificationToken.email, verificationToken.token);
+
+    redirect(paths.verificationEmailSentPage());
 
     return {
         errors: {},

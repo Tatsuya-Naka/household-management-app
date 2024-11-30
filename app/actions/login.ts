@@ -4,9 +4,11 @@ import { signIn } from "@/auth";
 import { getUserByEmail } from "@/data/user";
 import { sendVerificationEmail } from "@/lib/mail";
 import { generateVerificationToken } from "@/lib/token";
+import paths from "@/paths";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { LogInSchema } from "@/schemas/login";
 import { AuthError } from "next-auth";
+import { redirect } from "next/navigation";
 
 export interface LoginState {
     errors: {
@@ -59,6 +61,8 @@ export async function login(formState: LoginState, formData: FormData): Promise<
     if (!existingUser.emailVerified) {
         const verificationToken = await generateVerificationToken(existingUser.email);
         await sendVerificationEmail(verificationToken.email, verificationToken.token);
+
+        redirect(paths.verificationEmailSentPage());
 
         return {
             errors: {},
