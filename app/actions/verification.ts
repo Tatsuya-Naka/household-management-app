@@ -22,7 +22,7 @@ export async function verification(token: string): Promise<VerificationState> {
     }
 
     const verificationToken = await getVerificationTokenByToken(token);
-    
+    console.log(verificationToken);
 
     return {
         errors: {},
