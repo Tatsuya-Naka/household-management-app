@@ -5,12 +5,16 @@ export const publicRoutes = [
     paths.errorUrl(),
     paths.verificationEmail(),
     paths.verificationEmailSentPage(),
+    paths.verificationPassword(),
+    paths.verificationPasswordSentPage(),
+    paths.resetPasswordSuccessUrl(),
 ]
 
 export const authRoutes = [
     paths.logInUrl(),
     paths.signInEmailUrl(),
     paths.signInUrl(),
+    paths.resetPasswordUrl(),
 ]
 
 export const setAuthRoutes = [

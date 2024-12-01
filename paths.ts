@@ -29,6 +29,18 @@ const paths = {
     verificationEmailSentPage() {
         return "/new-user/email/confirm";
     },
+    resetPasswordUrl() {
+        return "/reset/password";
+    },
+    verificationPassword() {
+        return "/reset/password/verification";
+    },
+    verificationPasswordSentPage() {
+        return "/reset/password/confirm";
+    },
+    resetPasswordSuccessUrl() {
+        return "/reset/password/success";
+    },
 }
 
 export default paths;
