@@ -15,7 +15,8 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 }
 
 export const sendVerificationResetPassword = async(email: string, token: string) => {
-    const confirmLink = `http://localhost:3000/reset/password/verification?token=${token}`;
+    // const confirmLink = `http://localhost:3000/reset/password/verification?token=${token}`;
+    const confirmLink = `https://household-management-app.vercel.app/reset/password/verification?token=${token}`;
 
     await resend.emails.send({
         from: "onboarding@resend.dev",
