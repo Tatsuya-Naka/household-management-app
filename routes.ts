@@ -21,6 +21,13 @@ export const setAuthRoutes = [
     paths.registerInfoUrl(),
 ]
 
+export const privateRoutes = [
+    paths.recordsPageUrl(),
+    paths.newRecordPageUrl(),
+    paths.communityPageUrl(),
+    paths.settingPageUrl(),
+]
+
 export const API_AUTH_PREFIX = paths.authPrefix();
 export const DEFAULT_REDIRECT = paths.default();
 export const DEFAULT_LOGIN_REDIRECT = paths.home();

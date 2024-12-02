@@ -41,6 +41,18 @@ const paths = {
     resetPasswordSuccessUrl() {
         return "/reset/password/success";
     },
+    recordsPageUrl() {
+        return "/records";
+    },
+    newRecordPageUrl() {
+        return "/new-record";
+    },
+    communityPageUrl() {
+        return "/community";
+    },
+    settingPageUrl() {
+        return "/setting";
+    },
 }
 
 export default paths;

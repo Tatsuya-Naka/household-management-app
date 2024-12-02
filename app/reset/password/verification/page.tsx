@@ -3,8 +3,10 @@ import { Suspense } from "react";
 
 export default async function ResetPasswordVerificationPage() {
     return (
-        <Suspense>
-            <ChangePasswordForm />
-        </Suspense>
+        <div>
+            <Suspense>
+                <ChangePasswordForm />
+            </Suspense>
+        </div>
     )
 }
