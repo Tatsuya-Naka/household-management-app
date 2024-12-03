@@ -26,6 +26,7 @@ export const privateRoutes = [
     paths.newRecordPageUrl(),
     paths.communityPageUrl(),
     paths.settingPageUrl(),
+    paths.logOutPageUrl(),
 ]
 
 export const API_AUTH_PREFIX = paths.authPrefix();

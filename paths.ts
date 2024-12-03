@@ -53,6 +53,9 @@ const paths = {
     settingPageUrl() {
         return "/setting";
     },
+    logOutPageUrl() {
+        return "/log-out";
+    },
 }
 
 export default paths;
