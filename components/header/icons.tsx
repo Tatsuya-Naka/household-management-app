@@ -12,7 +12,7 @@ import { FaUserFriends } from "react-icons/fa";
 import { IoIosLogOut } from "react-icons/io";
 import paths from '@/paths';
 
-interface IconsProps {
+export interface IconsProps {
     id?: string;
     name?: string | null | undefined;
     image?: string | null | undefined;
