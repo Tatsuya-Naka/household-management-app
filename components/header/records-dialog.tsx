@@ -8,7 +8,7 @@ import Icons, { IconsProps } from '@/components/header/icons';
 import { GoGraph } from "react-icons/go";
 import { FiDatabase } from "react-icons/fi";
 
-export default function RecordsDialog({id, name, image}: IconsProps) {
+export default function RecordsDialog({id, name, image, page}: IconsProps) {
     const [mouse, setMounse] = useState(false);
 
     return (
@@ -29,7 +29,7 @@ export default function RecordsDialog({id, name, image}: IconsProps) {
                         <li className='mr-5' onMouseEnter={() => setMounse(false)}>
                             <Link
                                 href={paths.home()}
-                                className={`text-xl text-slate-800 font-[700] bg-white/50 px-2 py-1 rounded-md cursor-pointer`}
+                                className={`${page==="dashboard" ? "bg-white/50" : "bg-transparent hover:underline hover:underline-offset-4"} text-xl text-slate-800 font-[700] px-2 py-1 rounded-md cursor-pointer`}
                             >
                                 Dashboard
                             </Link>
@@ -38,7 +38,7 @@ export default function RecordsDialog({id, name, image}: IconsProps) {
                         <li className='mr-5 relative z-10' onMouseEnter={() => setMounse(true)}>
                             <Link
                                 href={paths.recordsPageUrl()}
-                                className={`text-xl text-slate-800 font-[700] bg-transparent hover:underline hover:underline-offset-4 cursor-pointer`}
+                                className={`${page==="records" ? "bg-white/50" : "bg-transparent hover:underline hover:underline-offset-4"} text-xl text-slate-800 font-[700] px-2 py-1 rounded-md cursor-pointer`}
                             >
                                 Records
                             </Link>
@@ -46,7 +46,7 @@ export default function RecordsDialog({id, name, image}: IconsProps) {
                         <li className='mr-5' onMouseEnter={() => setMounse(false)}>
                             <Link
                                 href={paths.newRecordPageUrl()}
-                                className={`text-xl text-slate-800 font-[700] bg-transparent hover:underline hover:underline-offset-4 cursor-pointer`}
+                                className={`${page==="new-record" ? "bg-white/50" : "bg-transparent hover:underline hover:underline-offset-4"} text-xl text-slate-800 font-[700] px-2 py-1 rounded-md cursor-pointer`}
                             >
                                 Register
                             </Link>
@@ -54,7 +54,7 @@ export default function RecordsDialog({id, name, image}: IconsProps) {
                         <li className='mr-5' onMouseEnter={() => setMounse(false)}>
                             <Link
                                 href={paths.communityPageUrl()}
-                                className={`text-xl text-slate-800 font-[700] bg-transparent hover:underline hover:underline-offset-4 cursor-pointer`}
+                                className={`${page==="xrate" ? "bg-white/50" : "bg-transparent hover:underline hover:underline-offset-4"} text-xl text-slate-800 font-[700] px-2 py-1 rounded-md cursor-pointer`}
                             >
                                 X-Rates
                             </Link>
@@ -62,7 +62,7 @@ export default function RecordsDialog({id, name, image}: IconsProps) {
                         <li className='mr-5' onMouseEnter={() => setMounse(false)}>
                             <Link
                                 href={paths.communityPageUrl()}
-                                className={`text-xl text-slate-800 font-[700] bg-transparent hover:underline hover:underline-offset-4 cursor-pointer`}
+                                className={`${page==="community" ? "bg-white/50" : "bg-transparent hover:underline hover:underline-offset-4"} text-xl text-slate-800 font-[700] px-2 py-1 rounded-md cursor-pointer`}
                             >
                                 Community
                             </Link>
@@ -70,7 +70,7 @@ export default function RecordsDialog({id, name, image}: IconsProps) {
                         <li className='' onMouseEnter={() => setMounse(false)}>
                             <Link
                                 href={paths.settingPageUrl()}
-                                className={`text-xl text-slate-800 font-[700] bg-transparent hover:underline hover:underline-offset-4 cursor-pointer`}
+                                className={`${page==="setting" ? "bg-white/50" : "bg-transparent hover:underline hover:underline-offset-4"} text-xl text-slate-800 font-[700] px-2 py-1 rounded-md cursor-pointer`}
                             >
                                 Setting
                             </Link>

@@ -7,7 +7,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="max-w-full ">
             <header className="w-full px-5 py-3 h-[180px] bg-gradient-to-b from-sky-400 via-teal-200 to-emerald-400">
                 <div className='max-w-[1560px] relative z-[80] mx-auto h-full'>
-                    <RecordsDialog id={session?.user.id} name={session?.user.name} image={session?.user.image} />
+                    <RecordsDialog id={session?.user.id} name={session?.user.name} image={session?.user.image} page="dashboard" />
 
                     {/* If I click this, z-index should be z-10 */}
                     <button

@@ -16,6 +16,7 @@ export interface IconsProps {
     id?: string;
     name?: string | null | undefined;
     image?: string | null | undefined;
+    page?: string;
 };
 
 export default function Icons({ id, name, image }: IconsProps) {
