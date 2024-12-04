@@ -8,6 +8,8 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider/L
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs, { Dayjs } from "dayjs";
+import { MdOutlineAdd } from "react-icons/md";
+import { BsTrash } from "react-icons/bs";
 
 interface NewRegisterFormProps {
     id?: string;
@@ -85,7 +87,7 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
         }}>
             <div className="flex flex-col gap-3 pt-10">
                 {/* Dates & Type */}
-                <div className="grid grid-cols-3 gap-2 ml-5">
+                <div className="grid grid-cols-3 gap-2 ml-5 mb-2">
                     {/* Dates */}
                     <label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
                         Dates
@@ -187,7 +189,7 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
 
                 {/* Genre & Country */}
                 {(type === "income" || type === "expenses") &&
-                    <div className="grid grid-cols-2 gap-2 ml-5">
+                    <div className="grid grid-cols-2 gap-2 ml-5 mb-2">
                         {/* Genre, Search */}
                         <label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
                             Genre
@@ -260,8 +262,48 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                 }
 
                 {/* Item, Cateogry, SubCategory, Amount, Cost */}
-                <div>
+                <div className="flex items-center flex-col">
+                    <div className="pl-[40px] flex items-center justify-evenly w-full mb-2">
+                        <h2 className="text-xl font-[600] text-slate-800">
+                            Item
+                        </h2>
+                        <h2 className="text-xl font-[600] text-slate-800">
+                            Category
+                        </h2>
+                        <h2 className="text-xl font-[600] text-slate-800">
+                            Sub-category
+                        </h2>
+                        <h2 className="text-xl font-[600] text-slate-800">
+                            Amount
+                        </h2>
+                        <h2 className="text-xl font-[600] text-slate-800">
+                            Cost
+                        </h2>
+                    </div>
 
+                    <div className="flex flex-col items-center w-full gap-2 px-2">
+                        <div className="grid grid-cols-[40px_auto] text-center">
+                            <button className="flex items-center p-1 mr-2 hover:bg-gray-300/50 group rounded-md cursor-pointer">
+                                <BsTrash size={24} className=""/>
+                            </button>
+                            <div className="flex items-center justify-evenly w-full">
+                                <input className="outline-none w-full border-2 border-gray-500/50 border-solid rounded-lg text-lg px-3 py-1"/>
+                                <input className="outline-none w-full border-2 border-gray-500/50 border-solid rounded-lg text-lg px-3 py-1"/>
+                                <input className="outline-none w-full border-2 border-gray-500/50 border-solid rounded-lg text-lg px-3 py-1"/>
+                                <input className="outline-none w-full border-2 border-gray-500/50 border-solid rounded-lg text-lg px-3 py-1"/>
+                                <input className="outline-none w-full border-2 border-gray-500/50 border-solid rounded-lg text-lg px-3 py-1"/>
+                            </div>
+                        </div>
+
+                        <div className="w-full px-10">
+                            <button
+                                type="button"
+                                className="w-full cursor-pointer border-2 hover:border-gray-300/50 border-gray-500/50 border-solid rounded-lg text-lg px-3 py-1"
+                            >
+                                <MdOutlineAdd size={24} className="mx-auto"/>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
