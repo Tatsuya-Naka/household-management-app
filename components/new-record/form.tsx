@@ -10,11 +10,21 @@ import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs, { Dayjs } from "dayjs";
 import { MdOutlineAdd } from "react-icons/md";
 import { BsTrash } from "react-icons/bs";
+import { v4 as uuid } from "uuid";
 
 interface NewRegisterFormProps {
     id?: string;
     currency?: string;
     country?: string;
+};
+
+interface FormRow {
+    id: string;
+    item: string;
+    category: string;
+    subcategory?: string;
+    amount: number;
+    cost: number;
 };
 
 export default function NewRegisterForm({ id, currency, country }: NewRegisterFormProps) {
@@ -28,6 +38,10 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
     const [countryToggle, setCountryToggle] = useState(false);
     const [genre, setGenre] = useState("");
     const [genreToggle, setGenreToggle] = useState(false);
+
+    const [rows, setRows] = useState<FormRow[]>([
+        { id: uuid(), item: "", category: "", subcategory: "", amount: 0, cost: 0 }
+    ]);
 
     console.log("user: ", id);
 
@@ -80,6 +94,23 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
     const handleDateChange = (newDate: Dayjs) => {
         setDate(newDate.toDate());
     };
+
+    const handleAddRow = () => {
+        setRows([
+            ...rows,
+            { id: uuid(), item: "", category: "", subcategory: "", amount: 0, cost: 0 },
+        ])
+    }
+
+    const handleDeleteRow = (id: string) => {
+        setRows(rows.filter((row) => row.id != id))
+    };
+
+    const handleChangeRow = (id: string, field: string, value: string | number | null) => {
+        const updateRows = rows.map((row) =>
+            row.id == id ? { ...row, [field]: value } : row);
+        setRows(updateRows);
+    }
 
     return (
         <form className="grid grid-cols-[2fr_1fr] gap-3" onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
@@ -188,7 +219,7 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                 </div>
 
                 {/* Genre & Country */}
-                {(type === "income" || type === "expenses") &&
+                {(type === "expenses") &&
                     <div className="grid grid-cols-2 gap-2 ml-5 mb-2">
                         {/* Genre, Search */}
                         <label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
@@ -262,49 +293,80 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                 }
 
                 {/* Item, Cateogry, SubCategory, Amount, Cost */}
-                <div className="flex items-center flex-col">
-                    <div className="pl-[40px] flex items-center justify-evenly w-full mb-2">
-                        <h2 className="text-xl font-[600] text-slate-800">
-                            Item
-                        </h2>
-                        <h2 className="text-xl font-[600] text-slate-800">
-                            Category
-                        </h2>
-                        <h2 className="text-xl font-[600] text-slate-800">
-                            Sub-category
-                        </h2>
-                        <h2 className="text-xl font-[600] text-slate-800">
-                            Amount
-                        </h2>
-                        <h2 className="text-xl font-[600] text-slate-800">
-                            Cost
-                        </h2>
-                    </div>
-
-                    <div className="flex flex-col items-center w-full gap-2 px-2">
-                        <div className="grid grid-cols-[40px_auto] text-center">
-                            <button className="flex items-center p-1 mr-2 hover:bg-gray-300/50 group rounded-md cursor-pointer">
-                                <BsTrash size={24} className=""/>
-                            </button>
-                            <div className="flex items-center justify-evenly w-full">
-                                <input className="outline-none w-full border-2 border-gray-500/50 border-solid rounded-lg text-lg px-3 py-1"/>
-                                <input className="outline-none w-full border-2 border-gray-500/50 border-solid rounded-lg text-lg px-3 py-1"/>
-                                <input className="outline-none w-full border-2 border-gray-500/50 border-solid rounded-lg text-lg px-3 py-1"/>
-                                <input className="outline-none w-full border-2 border-gray-500/50 border-solid rounded-lg text-lg px-3 py-1"/>
-                                <input className="outline-none w-full border-2 border-gray-500/50 border-solid rounded-lg text-lg px-3 py-1"/>
-                            </div>
+                {(type === "expenses") &&
+                    <div className="flex items-center flex-col ml-5">
+                        <div className="grid grid-cols-[2fr_2fr_2fr_1fr_1fr_auto] gap-2 mb-4 font-semibold text-slate-800 w-full pr-11">
+                            <span className="">Item</span>
+                            <span className="">Category</span>
+                            <span>Sub-category</span>
+                            <span className="">Amount</span>
+                            <span className="">Cost</span>
                         </div>
+                        <div className="overflow-y-scroll max-h-[calc(100vh-380px)]">
 
-                        <div className="w-full px-10">
+                            {rows.map((row, index) => (
+                                <div key={index} className="flex items-center mb-2 gap-2 text-base w-full ">
+                                    <div className="grid grid-cols-[2fr_2fr_2fr_1fr_1fr_auto] gap-2">
+                                        <input
+                                            type="text"
+                                            name="item"
+                                            value={row.item}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "item", e.target.value)}
+                                            className="w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1"
+                                        />
+                                        <input
+                                            type="text"
+                                            name="category"
+                                            value={row.category}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "category", e.target.value)}
+                                            className="w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1"
+                                        />
+                                        <input
+                                            type="text"
+                                            name="subcategory"
+                                            value={row.subcategory}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "subcategory", e.target.value)}
+                                            className="w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1"
+                                        />
+                                        <input
+                                            type="number"
+                                            name="amount"
+                                            value={row.amount}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "amount", e.target.value)}
+                                            className="w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1"
+                                        />
+                                        <div className="w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1 flex items-center">
+                                            <div className="w-4">
+                                                $
+                                            </div>
+                                            <input
+                                                type="number"
+                                                name="cost"
+                                                value={row.cost}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "cost", e.target.value)}
+                                                className="w-full outline-none"
+                                            />
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="p-1 rounded-md bg-gray-200 hover:bg-gray-200/50 "
+                                        onClick={() => handleDeleteRow(row.id)}
+                                    >
+                                        <BsTrash size={24} className="" />
+                                    </button>
+                                </div>
+                            ))}
                             <button
                                 type="button"
-                                className="w-full cursor-pointer border-2 hover:border-gray-300/50 border-gray-500/50 border-solid rounded-lg text-lg px-3 py-1"
+                                onClick={handleAddRow}
+                                className="mt-4 w-full cursor-pointer border-2 hover:border-gray-300/50 border-gray-500/50 border-solid rounded-lg text-lg px-3 py-1"
                             >
-                                <MdOutlineAdd size={24} className="mx-auto"/>
+                                <MdOutlineAdd size={24} className="mx-auto" />
                             </button>
                         </div>
                     </div>
-                </div>
+                }
             </div>
 
             {/* Image, Memo, Confirm Button */}
