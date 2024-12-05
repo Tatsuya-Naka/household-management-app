@@ -12,7 +12,7 @@ export default function RecordsDialog({id, name, image, page}: IconsProps) {
     const [mouse, setMounse] = useState(false);
 
     return (
-        <div className="relative z-10">
+        <div className="relative z-20">
             <div className='flex items-center justify-between'>
                 {/* Icon, name, pages title */}
                 <div className='flex items-center w-full'>

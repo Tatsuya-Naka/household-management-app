@@ -11,6 +11,7 @@ import dayjs, { Dayjs } from "dayjs";
 import { MdOutlineAdd } from "react-icons/md";
 import { BsTrash } from "react-icons/bs";
 import { v4 as uuid } from "uuid";
+import { IoReceiptOutline } from "react-icons/io5";
 
 interface NewRegisterFormProps {
     id?: string;
@@ -38,6 +39,9 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
     const [countryToggle, setCountryToggle] = useState(false);
     const [genre, setGenre] = useState("");
     const [genreToggle, setGenreToggle] = useState(false);
+    const [resource, setResource] = useState("");
+    const [amount, setAmount] = useState<number>();
+    const [category, setCategory] = useState("");
 
     const [rows, setRows] = useState<FormRow[]>([
         { id: uuid(), item: "", category: "", subcategory: "", amount: 0, cost: 0 }
@@ -113,8 +117,8 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
     }
 
     return (
-        <form className="grid grid-cols-[2fr_1fr] gap-3" onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
-            e.preventDefault();
+        <form className="grid grid-cols-[2fr_1fr] w-full gap-3" onKeyDown={(e: React.KeyboardEvent<HTMLFormElement>) => {
+            if (e.key === "Enter") e.preventDefault();
         }}>
             <div className="flex flex-col gap-3 pt-10">
                 {/* Dates & Type */}
@@ -127,9 +131,8 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                         >
                             {generateDateFormat(date, "new-register")}
                         </div>
-
                         {dateToggle &&
-                            <div className="absolute top-15 right-0 left-0 w-full flex items-center flex-col gap-2">
+                            <div className="absolute top-15 right-0 left-0 w-full flex items-center bg-white z-10 flex-col gap-2">
                                 <div>
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                                         <DateCalendar
@@ -219,47 +222,64 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                 </div>
 
                 {/* Genre & Country */}
-                {(type === "expenses") &&
+                {(type === "expenses" || type === "income") &&
                     <div className="grid grid-cols-2 gap-2 ml-5 mb-2">
-                        {/* Genre, Search */}
-                        <label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
-                            Genre
-                            <input
-                                name="genre"
-                                type="text"
-                                value={genre}
-                                className="outline-none w-full flex items-center justify-between bg-white border-gray-500/50 border-2 border-solid rounded-lg px-2 py-1 text-base font-[700]"
-                                onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                                    setGenre(e.currentTarget.value);
-                                    setGenreToggle(true);
-                                }}
-                                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                                    if (e.key === "Enter") {
-                                        setGenreToggle(false);
-                                    }
-                                }}
-                            />
-                            {genreToggle &&
-                                <div className="absolute top-15 right-0 left-0 w-full">
-                                    <div className="bg-white hover:bg-white border-2 border-gray-500/50 border-solid rounded-lg">
-                                        <ul className="w-full">
-                                            <li
-                                                className="cursor-pointer bg-white text-gray-600 hover:text-slate-900 hover:bg-white rounded-md px-2 py-1"
-                                                onClick={() => {
-                                                    setGenre("Grocery Store");
-                                                    setGenreToggle(false);
-                                                }}
-                                            >
-                                                Grocery Store
-                                            </li>
-                                        </ul>
-                                        <div className="rounded-b-lg bg-gray-500/50 text-slate-800 font-[700] flex items-center justify-end px-2 py-0.5">
-                                            <p className="text-base">Powered by @Tatsuya</p>
+                        {type === "income" &&
+                            // Resorce
+                            < label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
+                                Resource
+                                <input
+                                    name="resource"
+                                    type="text"
+                                    value={resource}
+                                    className="outline-none w-full flex items-center justify-between bg-white border-gray-500/50 border-2 border-solid rounded-lg px-2 py-1 text-base font-[700]"
+                                    onChange={(e: React.FormEvent<HTMLInputElement>) => {
+                                        setResource(e.currentTarget.value);
+                                    }}
+                                />
+                            </label>
+                        }
+                        {type === "expenses" &&
+                            // Genre
+                            < label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
+                                Genre
+                                <input
+                                    name="genre"
+                                    type="text"
+                                    value={genre}
+                                    className="outline-none w-full flex items-center justify-between bg-white border-gray-500/50 border-2 border-solid rounded-lg px-2 py-1 text-base font-[700]"
+                                    onChange={(e: React.FormEvent<HTMLInputElement>) => {
+                                        setGenre(e.currentTarget.value);
+                                        setGenreToggle(true);
+                                    }}
+                                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                                        if (e.key === "Enter") {
+                                            setGenreToggle(false);
+                                        }
+                                    }}
+                                />
+                                {genreToggle &&
+                                    <div className="absolute top-15 right-0 left-0 w-full">
+                                        <div className="bg-white hover:bg-white border-2 border-gray-500/50 border-solid rounded-lg">
+                                            <ul className="w-full">
+                                                <li
+                                                    className="cursor-pointer bg-white text-gray-600 hover:text-slate-900 hover:bg-white rounded-md px-2 py-1"
+                                                    onClick={() => {
+                                                        setGenre("Grocery Store");
+                                                        setGenreToggle(false);
+                                                    }}
+                                                >
+                                                    Grocery Store
+                                                </li>
+                                            </ul>
+                                            <div className="rounded-b-lg bg-gray-500/50 text-slate-800 font-[700] flex items-center justify-end px-2 py-0.5">
+                                                <p className="text-base">Powered by @Tatsuya</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            }
-                        </label>
+                                }
+                            </label>
+                        }
 
                         {/* Country */}
                         <label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
@@ -292,6 +312,41 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                     </div>
                 }
 
+                {type === "income" &&
+                    <div className="grid grid-cols-2 gap-2 ml-5 mb-2">
+                        {/* Amount */}
+                        < label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
+                            Amount
+                            <div className="font-[700] w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1 flex items-center">
+                                <div className="w-4">
+                                    $
+                                </div>
+                                <input
+                                    type="number"
+                                    name="amount-income"
+                                    value={amount}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(Number(e.currentTarget.value))}
+                                    className="w-full outline-none"
+                                />
+                            </div>
+                        </label>
+
+                        {/* Category */}
+                        < label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
+                            Category
+                            <input
+                                name="category_income"
+                                type="text"
+                                value={category}
+                                className="font-[700] outline-none w-full flex items-center justify-between bg-white border-gray-500/50 border-2 border-solid rounded-lg px-2 py-1 text-base font-[700]"
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                    setCategory(e.currentTarget.value);
+                                }}
+                            />
+                        </label>
+                    </div>
+                }
+
                 {/* Item, Cateogry, SubCategory, Amount, Cost */}
                 {(type === "expenses") &&
                     <div className="flex items-center flex-col ml-5">
@@ -302,7 +357,7 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                             <span className="">Amount</span>
                             <span className="">Cost</span>
                         </div>
-                        <div className="overflow-y-scroll max-h-[calc(100vh-380px)]">
+                        <div className="overflow-y-scroll max-h-[calc(100vh-450px)] w-full">
 
                             {rows.map((row, index) => (
                                 <div key={index} className="flex items-center mb-2 gap-2 text-base w-full ">
@@ -370,7 +425,32 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
             </div>
 
             {/* Image, Memo, Confirm Button */}
-
-        </form>
+            <div className="flex items-center pt-10 w-full flex-col ">
+                <label className="mb-3 h-[240px] flex items-start justify-center bg-gradient-to-r from-sky-300 via-violet-300 to-pink-100 w-full rounded-lg cursor-pointer hover:opacity-80">
+                    <div className="w-full flex items-center justify-center h-full">
+                        <IoReceiptOutline size={48} className="fill-black mr-3" />
+                        <span>Upload image</span>
+                    </div>
+                    <input
+                        type="file"
+                        name="object"
+                        hidden
+                    />
+                </label>
+                <label className="w-full">
+                    <span className="font-[600] text-base text-slate-800">Comment</span>
+                    <textarea
+                        name="comment"
+                        className="mb-3 h-[180px] resize-none w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1"
+                    />
+                </label>
+                <button
+                    type="submit"
+                    className="w-full rounded-lg px-3 py-2 bg-orange-400 hover:bg-orange-400/50 text-white font-[700]"
+                >
+                    Confirm
+                </button>
+            </div>
+        </form >
     )
 }

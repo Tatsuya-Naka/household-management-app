@@ -15,7 +15,7 @@ export default async function NewRecordPageLayout({ children }: { children: Reac
                 </div>
             </header>
 
-            <main className='max-w-[1560px]  pr-[81px] min-h-[calc(100%-180px)]'>
+            <main className='max-w-[1560px]  pr-[81px] min-h-[calc(100%-180px)] mx-auto'>
                 {children}
             </main>
         </div>
