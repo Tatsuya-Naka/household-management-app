@@ -1,10 +1,31 @@
+"use client";
+
 import { generateDateFormat } from "@/data/date";
 import { RiCloseLine } from "react-icons/ri";
 import { CiImageOff } from "react-icons/ci";
 import { RiArrowGoBackLine } from "react-icons/ri";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import paths from "@/paths";
+import { useFormContext } from "react-hook-form";
 
-export default async function NewRecordConfirmPage() {
+type Items = {
+    item: string;
+    category: string;
+    subcategory?: string;
+    amount: number;
+    cost: number;
+}
+
+export default function NewRecordConfirmPage() {
+    const router = useRouter();
+    const { getValues } = useFormContext();
+    const values = getValues();
+
+    console.log("Values: ", values);
+    const handleBackToPage = async () => {
+        router.push(paths.newRecordPageUrl());
+    };
+
     return (
         <div className="max-w-full bg-orange-200/50 min-h-screen">
             <header className="max-w-[1560px] h-[56px] relative z-10 px-5 py-3 flex items-center justify-between border-b-2 border-white border-solid mx-auto">
@@ -30,7 +51,7 @@ export default async function NewRecordConfirmPage() {
                                 </div>
 
                                 <div className="px-2 text-xl font-[700] border-r-2 border-black py-1 border-solid">
-                                    {generateDateFormat(new Date())}
+                                    {generateDateFormat(values.date)}
                                 </div>
                             </div>
 
@@ -39,8 +60,8 @@ export default async function NewRecordConfirmPage() {
                                     Type
                                 </div>
 
-                                <div className="px-2 text-xl font-[700] py-1">
-                                    Expenses
+                                <div className="px-2 text-xl font-[700] py-1 capitalize">
+                                    {values.type}
                                 </div>
                             </div>
 
@@ -50,7 +71,7 @@ export default async function NewRecordConfirmPage() {
                                 </div>
 
                                 <div className="px-2 text-xl font-[700] border-r-2 border-black py-1 border-solid">
-
+                                    {values.currency}
                                 </div>
                             </div>
 
@@ -60,7 +81,7 @@ export default async function NewRecordConfirmPage() {
                                 </div>
 
                                 <div className="px-2 text-xl font-[700] py-1">
-
+                                    {values.genre}
                                 </div>
                             </div>
 
@@ -70,7 +91,7 @@ export default async function NewRecordConfirmPage() {
                                 </div>
 
                                 <div className="px-2 text-xl font-[700] py-1">
-
+                                    {values.country}
                                 </div>
                             </div>
                         </div>
@@ -85,13 +106,17 @@ export default async function NewRecordConfirmPage() {
                                 <span>Cost</span>
                             </div>
                             <div className="overflow-y-scroll no-scrollbar h-[450px]">
-                                <div className="text-xl grid grid-cols-[2fr_2fr_2fr_1fr_1fr] bg-transparent text-slate-800 font-[600] px-2 py-1">
-                                    <span>Orange</span>
-                                    <span>Food</span>
-                                    <span>Food</span>
-                                    <span>0</span>
-                                    <span>$ 0.4</span>
-                                </div>
+                                {values.items.map((value: Items, index: number) => {
+                                    return (
+                                        <div key={index} className="text-xl grid grid-cols-[2fr_2fr_2fr_1fr_1fr] bg-transparent text-slate-800 font-[600] px-2 py-1">
+                                            <span>{value.item}</span>
+                                            <span>{value.category}</span>
+                                            <span>{value.subcategory}</span>
+                                            <span>{value.amount}</span>
+                                            <span>{value.cost}</span>
+                                        </div>
+                                    )
+                                })}
                             </div>
                         </div>
                     </div>
@@ -99,30 +124,28 @@ export default async function NewRecordConfirmPage() {
                     {/* Image, Comment, check, button */}
                     <div className="grid grid-rows-[20px_320px_180px_80px_auto] gap-3 h-full">
                         <div className="flex items-center justify-end">
-                            <Link
-                                href="/"
+                            <button
+                                onClick={handleBackToPage}
                                 className="border-b-2 border-slate-800 border-solid hover:opacity-60 cursor-pointer flex items-center gap-2"
                             >
                                 <RiArrowGoBackLine size={24} />
                                 <span>Back to the form page</span>
-                            </Link>
+                            </button>
                         </div>
                         <div className="w-full h-full bg-gray-500 flex items-center justify-center rounded-md gap-2">
                             <CiImageOff size={48} className="fill-white" />
                             <span className="font-[700] text-white text-xl">No Content</span>
                         </div>
 
-                        <div className="w-full h-[180px] overflow-y-scrollbar no-scrollbar">
-                            <div className="bg-white/50 rounded-md p-2 h-full">
-
-                            </div>
+                        <div className="w-full h-[180px] overflow-y-scroll no-scrollbar bg-white/50 rounded-md p-2">
+                            {values.comment}
                         </div>
 
                         <div className="w-full flex flex-col justify-center gap-2 h-full">
                             <span className="text-xl font-[600] text-black">Check (Optional)</span>
                             <div className="w-full flex items-center justify-between text-lg font-[500]">
                                 <label className="w-full">
-                                    
+
                                 </label>
 
                                 <label className="w-full">

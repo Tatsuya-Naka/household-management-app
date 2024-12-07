@@ -1,9 +1,8 @@
-import { auth } from "@/auth";
+"use client";
 import NewRegisterForm from "@/components/new-record/form";
 import { FaCashRegister } from "react-icons/fa";
 
-export default async function CreateNewRecordPage() {
-    const session = await auth();
+export default function CreateNewRecordPage() {
     return (
         <div className="relative">
             {/* Icon */}
@@ -12,7 +11,7 @@ export default async function CreateNewRecordPage() {
             </div>
             {/* Body */}
             <div className="w-full absolute top-0 left-0 right-0">
-                <NewRegisterForm id={session?.user.id} currency={session?.user.currency} country={session?.user.location} />
+                <NewRegisterForm />
             </div>
         </div>
     )

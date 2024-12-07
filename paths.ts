@@ -45,7 +45,7 @@ const paths = {
         return "/records";
     },
     newRecordPageUrl() {
-        return "/new-record";
+        return "/register/new-record";
     },
     communityPageUrl() {
         return "/community";
@@ -55,6 +55,9 @@ const paths = {
     },
     logOutPageUrl() {
         return "/log-out";
+    },
+    newRecordConfirmUrl() {
+        return "/register/confirm";
     },
 }
 

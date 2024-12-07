@@ -1,5 +1,6 @@
 "use server";
 
-export default async function NewRecord() {
+export async function NewRecord() {
     "use server";
+    
 }

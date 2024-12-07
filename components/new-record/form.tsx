@@ -1,7 +1,7 @@
 "use client";
 
 import { generateDateFormat } from "@/data/date";
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { GoTriangleDown } from "react-icons/go";
 import { US, EU, JP, AU } from 'country-flag-icons/react/3x2'
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider/LocalizationProvider";
@@ -10,44 +10,43 @@ import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs, { Dayjs } from "dayjs";
 import { MdOutlineAdd } from "react-icons/md";
 import { BsTrash } from "react-icons/bs";
-import { v4 as uuid } from "uuid";
 import { IoReceiptOutline } from "react-icons/io5";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useFieldArray, useFormContext } from "react-hook-form";
+import paths from "@/paths";
 
-interface NewRegisterFormProps {
-    id?: string;
-    currency?: string;
-    country?: string;
-};
+export default function NewRegisterForm() {
+    const { data: session } = useSession();
 
-interface FormRow {
-    id: string;
-    item: string;
-    category: string;
-    subcategory?: string;
-    amount: number;
-    cost: number;
-};
+    const router = useRouter();
+    const {register, handleSubmit, control, getValues, setValue, formState: {errors}} = useFormContext();
+    console.log(errors)
+    const onSubmit = handleSubmit(() => {
+        router.push(paths.newRecordConfirmUrl());
+    });
 
-export default function NewRegisterForm({ id, currency, country }: NewRegisterFormProps) {
-    const [date, setDate] = useState(new Date());
+    const {fields, append, remove} = useFieldArray({
+        control,
+        name: "items",
+    });
+
     const [dateToggle, setDateToggle] = useState(false);
-    const [type, setType] = useState("- - -");
     const [typeToggle, setTypeToggle] = useState(false);
-    const [formCurrency, setFormCurrency] = useState(currency);
     const [currencyToggle, setCurrencyToggle] = useState(false);
-    const [formCountry, setFormCountry] = useState(country);
     const [countryToggle, setCountryToggle] = useState(false);
-    const [genre, setGenre] = useState("");
     const [genreToggle, setGenreToggle] = useState(false);
-    const [resource, setResource] = useState("");
-    const [amount, setAmount] = useState<number>();
-    const [category, setCategory] = useState("");
 
-    const [rows, setRows] = useState<FormRow[]>([
-        { id: uuid(), item: "", category: "", subcategory: "", amount: 0, cost: 0 }
-    ]);
+    useEffect(() => {
+        if (session?.user) {
+            setValue("currency", session.user.currency);
+            setValue("country", session.user.location);
+        }
+    }, [session?.user, setValue]);
 
-    console.log("user: ", id);
+    // const [rows, setRows] = useState<FormRow[]>([
+    //     { id: uuid(), item: "", category: "", subcategory: "", amount: 0, cost: 0 }
+    // ]);
 
     const currencies = ["AUD", "YEN", "USD", "EUR"];
     const countries = ["Australia", "Japan", "US", "Europe"];
@@ -74,7 +73,7 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
     const displayCurrency = (name: string) => {
         return (
             <li key={name}
-                onClick={() => setFormCurrency(name)}
+                onClick={() => setValue("currency", name)}
                 className="w-full flex items-center gap-3 cursor-pointer px-1 py-0.5 hover:bg-gray-200 rounded-t-lg border-b-2 border-gray-200 border-solid"
             >
                 {getIcons(name)}
@@ -86,7 +85,7 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
     const displayCountry = (name: string) => {
         return (
             <li key={name}
-                onClick={() => setFormCountry(name)}
+                onClick={() => setValue("country", name)}
                 className="w-full flex items-center gap-3 cursor-pointer px-1 py-0.5 hover:bg-gray-200 rounded-t-lg border-b-2 border-gray-200 border-solid"
             >
                 {getIcons(name)}
@@ -96,30 +95,30 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
     };
 
     const handleDateChange = (newDate: Dayjs) => {
-        setDate(newDate.toDate());
+        setValue('date', newDate.toDate());
     };
 
     const handleAddRow = () => {
-        setRows([
-            ...rows,
-            { id: uuid(), item: "", category: "", subcategory: "", amount: 0, cost: 0 },
-        ])
+        append({ item: "", category: "", subcategory: "", amount: 0, cost: 0 })
     }
 
-    const handleDeleteRow = (id: string) => {
-        setRows(rows.filter((row) => row.id != id))
+    const handleDeleteRow = (index: number) => {
+        // setRows(rows.filter((row) => row.id != id));
+        remove(index)
     };
 
-    const handleChangeRow = (id: string, field: string, value: string | number | null) => {
-        const updateRows = rows.map((row) =>
-            row.id == id ? { ...row, [field]: value } : row);
-        setRows(updateRows);
-    }
+    // const handleChangeRow = (id: string, field: string, value: string | number | null) => {
+    //     const updateRows = rows.map((row) =>
+    //         row.id == id ? { ...row, [field]: value } : row);
+    //     setRows(updateRows);
+    // }
 
     return (
         <form className="grid grid-cols-[2fr_1fr] w-full gap-3" onKeyDown={(e: React.KeyboardEvent<HTMLFormElement>) => {
             if (e.key === "Enter") e.preventDefault();
-        }}>
+        }}
+            onSubmit={onSubmit}
+        >
             <div className="flex flex-col gap-3 pt-10">
                 {/* Dates & Type */}
                 <div className="grid grid-cols-3 gap-2 ml-5 mb-2">
@@ -129,27 +128,29 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                         <div className="cursor-pointer w-full bg-white border-gray-500/50 border-2 border-solid rounded-lg px-2 py-1 text-base font-[700] tracking-wide"
                             onClick={() => setDateToggle((prev) => !prev)}
                         >
-                            {generateDateFormat(date, "new-register")}
+                            {generateDateFormat(getValues("date"), "new-register")}
                         </div>
                         {dateToggle &&
                             <div className="absolute top-15 right-0 left-0 w-full flex items-center bg-white z-10 flex-col gap-2">
                                 <div>
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                                         <DateCalendar
-                                            value={dayjs(date)}
                                             onChange={handleDateChange}
+                                            value={dayjs(getValues("date"))}                                            
                                             showDaysOutsideCurrentMonth
                                             displayWeekNumber
                                         />
                                     </LocalizationProvider>
                                 </div>
-                                <button
-                                    className="-mt-10 w-full rounded-md bg-black hover:bg-black/50 px-2 py-1 text-white z-10"
-                                    type="button"
-                                    onClick={() => setDateToggle(false)}
-                                >
-                                    OK
-                                </button>
+                                <div className="bg-white w-full -mt-10 z-10">
+                                    <button
+                                        className="w-full rounded-md bg-black hover:bg-black/50 px-2 py-1 text-white z-10"
+                                        type="button"
+                                        onClick={() => setDateToggle(false)}
+                                    >
+                                        OK
+                                    </button>
+                                </div>
                             </div>
                         }
                     </label>
@@ -158,7 +159,7 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                     <label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
                         Types
                         <div className="w-full flex items-center justify-between bg-white border-gray-500/50 border-2 border-solid rounded-lg px-2 py-1 text-base font-[700]">
-                            <p className="capitalize">{type}</p>
+                            <p className="capitalize">{getValues("type")}</p>
                             <button
                                 className="cursor-pointer"
                                 type="button"
@@ -172,13 +173,20 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                                 <div className="bg-white hover:bg-white border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1">
                                     <ul>
                                         <li
-                                            onClick={() => setType("income")}
+                                            onClick={() => {
+                                                // setType("income");
+                                                setValue("type", "income");
+                                            }}
+                                            // onClick={async () => await setValue("type", "income")}
+                                            // {...register('type')}
                                             className="w-full cursor-pointer px-1 py-0.5 hover:bg-gray-200 rounded-t-lg border-b-2 border-gray-200 border-solid"
                                         >
                                             Income
                                         </li>
                                         <li
-                                            onClick={() => setType("expenses")}
+                                            onClick={() => {
+                                                setValue("type", "expenses")
+                                            }}
                                             className="w-full cursor-pointer px-1 py-0.5 hover:bg-gray-200 rounded-b-lg "
                                         >
                                             Expenses
@@ -190,13 +198,13 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                     </label>
 
                     {/* Currency */}
-                    {(type === "income" || type === "expenses") &&
+                    {(getValues("type") === "income" || getValues("type") === "expenses") &&
                         <label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
                             Currency
                             <div className="w-full flex items-center justify-between bg-white border-gray-500/50 border-2 border-solid rounded-lg px-2 py-1 text-base font-[700]">
                                 <div className="flex items-center gap-2">
-                                    {getIcons(formCurrency || "")}
-                                    <p>{formCurrency}</p>
+                                    {getIcons(getValues("currency") || "")}
+                                    <p>{getValues("currency")}</p>
                                 </div>
                                 <button
                                     className="cursor-pointer"
@@ -211,7 +219,7 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                                     <div className="bg-white hover:bg-white border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1">
                                         <ul key="1">
                                             {currencies
-                                                .filter((name) => name != formCurrency)
+                                                .filter((name) => name != getValues("currency"))
                                                 .map((name) => displayCurrency(name))}
                                         </ul>
                                     </div>
@@ -222,34 +230,36 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                 </div>
 
                 {/* Genre & Country */}
-                {(type === "expenses" || type === "income") &&
+                {(getValues("type") === "income" || getValues("type") === "expenses") &&
                     <div className="grid grid-cols-2 gap-2 ml-5 mb-2">
-                        {type === "income" &&
+                        {getValues("type") === "income" &&
                             // Resorce
                             < label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
                                 Resource
                                 <input
-                                    name="resource"
+                                    // name="resource"
                                     type="text"
-                                    value={resource}
+                                    {...register("resource")}
+                                    // value={resource}
                                     className="outline-none w-full flex items-center justify-between bg-white border-gray-500/50 border-2 border-solid rounded-lg px-2 py-1 text-base font-[700]"
-                                    onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                                        setResource(e.currentTarget.value);
-                                    }}
+                                    // onChange={(e: React.FormEvent<HTMLInputElement>) => {
+                                    //     setValue("resource", e.currentTarget.value);
+                                    // }}
                                 />
                             </label>
                         }
-                        {type === "expenses" &&
+                        {getValues("type") === "expenses" &&
                             // Genre
                             < label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
                                 Genre
                                 <input
-                                    name="genre"
+                                    // name="genre"
+                                    {...register("genre")}
                                     type="text"
-                                    value={genre}
+                                    // value={genre}
                                     className="outline-none w-full flex items-center justify-between bg-white border-gray-500/50 border-2 border-solid rounded-lg px-2 py-1 text-base font-[700]"
-                                    onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                                        setGenre(e.currentTarget.value);
+                                    onChange={() => {
+                                        // setGenre(e.currentTarget.value);
                                         setGenreToggle(true);
                                     }}
                                     onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -265,11 +275,11 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                                                 <li
                                                     className="cursor-pointer bg-white text-gray-600 hover:text-slate-900 hover:bg-white rounded-md px-2 py-1"
                                                     onClick={() => {
-                                                        setGenre("Grocery Store");
+                                                        // setGenre("Grocery Store");
                                                         setGenreToggle(false);
                                                     }}
                                                 >
-                                                    Grocery Store
+                                                    Test (not valid)
                                                 </li>
                                             </ul>
                                             <div className="rounded-b-lg bg-gray-500/50 text-slate-800 font-[700] flex items-center justify-end px-2 py-0.5">
@@ -286,8 +296,8 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                             Country
                             <div className="w-full flex items-center justify-between bg-white border-gray-500/50 border-2 border-solid rounded-lg px-2 py-1 text-base font-[700]">
                                 <div className="flex items-center gap-2">
-                                    {getIcons(formCountry || "")}
-                                    <p>{formCountry}</p>
+                                    {getIcons(getValues("country") || "")}
+                                    <p>{getValues("country")}</p>
                                 </div>
                                 <button
                                     className="cursor-pointer"
@@ -302,7 +312,7 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                                     <div className="bg-white hover:bg-white border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1">
                                         <ul key="2">
                                             {countries
-                                                .filter((name) => name != formCountry)
+                                                .filter((name) => name != getValues("country"))
                                                 .map((name) => displayCountry(name))}
                                         </ul>
                                     </div>
@@ -312,20 +322,22 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                     </div>
                 }
 
-                {type === "income" &&
+                {getValues("type") === "income" &&
                     <div className="grid grid-cols-2 gap-2 ml-5 mb-2">
                         {/* Amount */}
                         < label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
                             Amount
                             <div className="font-[700] w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1 flex items-center">
                                 <div className="w-4">
-                                    $
+                                    {(getValues("currency") === "USD" || getValues("currency") === "AUD") ? "$" : getValues("currency") === "YEN" ? "¥" : "£"}
                                 </div>
                                 <input
                                     type="number"
-                                    name="amount-income"
-                                    value={amount}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(Number(e.currentTarget.value))}
+                                    {...register("income_amount")}
+                                    step={0.01}
+                                    // name="amount-income"
+                                    // value={amount}
+                                    // onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(Number(e.currentTarget.value))}
                                     className="w-full outline-none"
                                 />
                             </div>
@@ -335,20 +347,21 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                         < label className="text-base w-full font-[500] text-slate-800 col-span-1 relative">
                             Category
                             <input
-                                name="category_income"
+                                {...register("income_category")}
+                                // name="category_income"
                                 type="text"
-                                value={category}
-                                className="font-[700] outline-none w-full flex items-center justify-between bg-white border-gray-500/50 border-2 border-solid rounded-lg px-2 py-1 text-base font-[700]"
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                    setCategory(e.currentTarget.value);
-                                }}
+                                // value={category}
+                                className="outline-none w-full flex items-center justify-between bg-white border-gray-500/50 border-2 border-solid rounded-lg px-2 py-1 text-base font-[700]"
+                                // onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                //     setCategory(e.currentTarget.value);
+                                // }}
                             />
                         </label>
                     </div>
                 }
 
                 {/* Item, Cateogry, SubCategory, Amount, Cost */}
-                {(type === "expenses") &&
+                {(getValues("type") === "expenses") &&
                     <div className="flex items-center flex-col ml-5">
                         <div className="grid grid-cols-[2fr_2fr_2fr_1fr_1fr_auto] gap-2 mb-4 font-semibold text-slate-800 w-full pr-11">
                             <span className="">Item</span>
@@ -358,47 +371,53 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                             <span className="">Cost</span>
                         </div>
                         <div className="overflow-y-scroll max-h-[calc(100vh-450px)] w-full">
-
-                            {rows.map((row, index) => (
+                            {errors.root && <div>{errors.root.message}</div>}
+                            {fields.map((field, index) => (
                                 <div key={index} className="flex items-center mb-2 gap-2 text-base w-full ">
                                     <div className="grid grid-cols-[2fr_2fr_2fr_1fr_1fr_auto] gap-2">
                                         <input
                                             type="text"
-                                            name="item"
-                                            value={row.item}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "item", e.target.value)}
+                                            {...register(`items[${index}].item`)}
+                                            // name="item"
+                                            // value={row.item}
+                                            // onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "item", e.target.value)}
                                             className="w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1"
                                         />
                                         <input
                                             type="text"
-                                            name="category"
-                                            value={row.category}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "category", e.target.value)}
+                                            {...register(`items[${index}].category`)}
+                                            // name="category"
+                                            // value={row.category}
+                                            // onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "category", e.target.value)}
                                             className="w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1"
                                         />
                                         <input
                                             type="text"
-                                            name="subcategory"
-                                            value={row.subcategory}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "subcategory", e.target.value)}
+                                            {...register(`items[${index}].subcategory`)}
+                                            // name="subcategory"
+                                            // value={row.subcategory}
+                                            // onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "subcategory", e.target.value)}
                                             className="w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1"
                                         />
                                         <input
                                             type="number"
-                                            name="amount"
-                                            value={row.amount}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "amount", e.target.value)}
+                                            {...register(`items[${index}].amount`)}
+                                            // name="amount"
+                                            // value={row.amount}
+                                            // onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "amount", e.target.value)}
                                             className="w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1"
                                         />
                                         <div className="w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1 flex items-center">
                                             <div className="w-4">
-                                                $
+                                                {(getValues("currency") === "USD" || getValues("currency") === "AUD") ? "$" : getValues("currency") === "YEN" ? "¥" : "£"}
                                             </div>
                                             <input
                                                 type="number"
-                                                name="cost"
-                                                value={row.cost}
-                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "cost", e.target.value)}
+                                                {...register(`items[${index}].cost`)}
+                                                step={0.01}
+                                                // name="cost"
+                                                // value={row.cost}
+                                                // onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "cost", e.target.value)}
                                                 className="w-full outline-none"
                                             />
                                         </div>
@@ -406,7 +425,7 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                                     <button
                                         type="button"
                                         className="p-1 rounded-md bg-gray-200 hover:bg-gray-200/50 "
-                                        onClick={() => handleDeleteRow(row.id)}
+                                        onClick={() => handleDeleteRow(index)}
                                     >
                                         <BsTrash size={24} className="" />
                                     </button>
@@ -433,15 +452,15 @@ export default function NewRegisterForm({ id, currency, country }: NewRegisterFo
                     </div>
                     <input
                         type="file"
-                        name="object"
                         hidden
+                        {...register("object")}
                     />
                 </label>
                 <label className="w-full">
                     <span className="font-[600] text-base text-slate-800">Comment</span>
                     <textarea
-                        name="comment"
                         className="mb-3 h-[180px] resize-none w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1"
+                        {...register('comment')}
                     />
                 </label>
                 <button
