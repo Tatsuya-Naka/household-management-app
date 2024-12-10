@@ -44,6 +44,7 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
+  records       Record[]
 }
 
 model VerificationToken {
@@ -53,4 +54,128 @@ model VerificationToken {
   expires       DateTime 
 
   @@unique([email, token])
+}
+
+model Record {
+  id                String @id @default(cuid())
+  userId            String 
+  typeId            String
+  currencyId        String
+  resourceId        String?
+  countryId         String
+  income_amount     String?
+  income_categoryId String?
+  income_status     String?
+  genreId           String?     
+  Items             Items[]
+  comment           String?
+  totalcost         Float?
+  payment_methodId  String?
+  regular_unitId    String?
+  regular_num       Int 
+  isSubmitted       Boolean @default(false)
+  xrateId           String 
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          type @relation(fields: [typeId], references: [id])
+  currency      Currency  @relation(fields: [currencyId], references: [id])
+  incomeresource      IncomeResource?  @relation(fields: [resourceId], references: [id])
+  country       Country   @relation(fields: [countryId], references: [id])
+  incomecategory  IncomeCategory? @relation(fields: [income_categoryId], references: [id])
+  genre         Genre? @relation(fields: [genreId], references: [id])
+  paymentmethod PaymentMethod? @relation(fields: [payment_methodId], references: [id])
+  regularunit   RegularUnit? @relation(fields: [regular_unitId], references: [id])
+  xrate         XRate @relation(fields: [xrateId], references: [id])
+}
+
+model type {
+  id            String @id @default(cuid())
+  name          String @unique
+  records       Record[]
+}
+
+model IncomeCategory {
+  id            String @id @default(cuid())
+  name          String @unique 
+  records       Record[]
+}
+
+model IncomeResource {
+  id            String @id @default(cuid())
+  name          String @unique
+  records       Record[]
+}
+
+model Category {
+  id            String @id @default(cuid())
+  name          String @unique
+  subcategories SubCategory[]
+  items         Items[]
+}
+
+model SubCategory {
+  id            String @id @default(cuid())
+  name          String  @unique
+  categoryId    String 
+  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  items         Items[]
+}
+
+model Currency {
+  id            String @id @default(cuid())
+  name          String @unique
+  records       Record[]
+}
+
+model Country {
+  id            String @id @default(cuid())
+  name          String @unique
+  records       Record[]
+}
+
+model Genre {
+  id            String @id @default(cuid())
+  name          String @unique
+  records       Record[]
+}
+
+model Items {
+  id            String  @id @default(cuid())
+  item          String 
+  categoryId    String 
+  subcategoryId String?
+  amount        Int
+  cost          Float
+  category      Category @relation(fields: [categoryId], references: [id])
+  subcategory   SubCategory? @relation(fields: [subcategoryId], references: [id])
+  recordId      String 
+  record        Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model PaymentMethod {
+  id            String  @id @default(cuid())
+  name          String  @unique
+  records       Record[]
+}
+
+model RegularUnit {
+  id            String  @id @default(cuid())
+  name          String  @unique
+  records       Record[]
+}
+
+model XRate {
+  id            String @id @default(cuid())
+  base          String @unique
+  aud           Float
+  jpy           Float 
+  usd           Float 
+  eur           Float 
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  records       Record[]
 }
