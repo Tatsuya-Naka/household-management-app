@@ -5,8 +5,8 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
     try {        
         const body = await req.json();
-        console.log({body});
-        console.log("Items: ", body.items);
+        // console.log({body});
+        // console.log("Items: ", body.items);
         return NextResponse.json({message: "Success"}, {status: 200});
     } catch (err: unknown) {
         if (err instanceof Error) {
