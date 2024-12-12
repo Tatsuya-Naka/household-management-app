@@ -24,7 +24,7 @@ export default function CancelButton() {
                 <div className="relative z-[999]">
                     <div className="inset-0 fixed bg-black/50 "></div>
                     <div className="inset-0 fixed z-10 flex items-center justify-center">
-                        <div className="sm:w-[480px] w-full bg-white rounded-lg px-2 py-1.5 shadow-xl flex flex-col items-start">
+                        <div className="sm:w-[480px] w-full bg-white rounded-lg px-4 py-3 shadow-xl flex flex-col items-start">
                             <div className="flex items-center justify-between w-full">
                                 <h2 className="text-xl font-[700] text-slate-800">
                                     Cancel confirmation

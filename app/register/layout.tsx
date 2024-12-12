@@ -12,7 +12,7 @@ export default function NewRecordLayout({ children }: { children: React.ReactNod
     const methods = useForm<NewRecordType>({
         mode: "onChange",
         defaultValues: {
-            date: new Date(), type: "- - -", currency: "", country: "", resource: "", income_amount: 0, income_category: "",
+            date: new Date(), type: "- - -", currency: "", country: "", resource: "", income_amount: 0, income_category: "", status: "",
             genre: "",
             items: [{ item: "", category: "", subcategory: "", amount: 0, cost: 0 }],
             comment: "",

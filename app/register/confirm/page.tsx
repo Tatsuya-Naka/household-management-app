@@ -10,8 +10,6 @@ import { useFormContext } from "react-hook-form";
 import { useState } from "react";
 import { NewRecordType } from "../layout";
 import Link from "next/link";
-import { FaRegCircle } from "react-icons/fa";
-import { AiOutlineLoading } from "react-icons/ai";
 
 export type Items = {
     item?: string;
@@ -59,7 +57,7 @@ export default function NewRecordConfirmPage() {
             // });
 
             // console.log(JSON.stringify(data));
-            
+
             const response = await fetch("./api/new-record", {
                 method: "POST",
                 body: JSON.stringify(data),
@@ -67,8 +65,12 @@ export default function NewRecordConfirmPage() {
                     "Content-Type": "application/json",
                 },
             });
-            const result = await response.json();
-            console.log({mesage: result.message});
+
+            if (!response.ok) {
+                const result = await response.json();
+                console.log({ mesage: result.message });
+                setError("root", {type: "custom", message: result.message});
+            }
             // if (!response.ok) {
             //     // setError ("root", {type: "custom", message: response.message});
             //     setErrorMessagePopUp(true);
@@ -285,7 +287,10 @@ export default function NewRecordConfirmPage() {
                                             className={`bg-transparent ${(clickedCheck === "hourly" || values.regular_unit === "hourly") ? "text-slate-800 " : "hover:text-slate-800 text-slate-800/50"} font-[700] text-xl`}
                                             onClick={() => {
                                                 setClickedCheck((prev) => prev !== "hourly" ? "hourly" : "")
-                                                if (values.regular_unit === "hourly") setValue("regular_unit", "");
+                                                if (values.regular_unit === "hourly") {
+                                                    setValue("regular_unit", "");
+                                                    setValue("regular_num", undefined);
+                                                }
                                                 else setValue("regular_unit", "hourly");
                                             }}
                                             disabled={isSubmitting}
@@ -298,7 +303,10 @@ export default function NewRecordConfirmPage() {
                                             className={`bg-transparent ${(clickedCheck === "weekly" || values.regular_unit === "weekly") ? "text-slate-800 " : "hover:text-slate-800 text-slate-800/50"} font-[700] text-xl`}
                                             onClick={() => {
                                                 setClickedCheck((prev) => prev !== "weekly" ? "weekly" : "")
-                                                if (values.regular_unit === "weekly") setValue("regular_unit", "");
+                                                if (values.regular_unit === "weekly") {
+                                                    setValue("regular_unit", "");
+                                                    setValue("regular_num", undefined);
+                                                }
                                                 else setValue("regular_unit", "weekly");
                                             }}
                                             disabled={isSubmitting}
@@ -311,7 +319,10 @@ export default function NewRecordConfirmPage() {
                                             className={`bg-transparent ${(clickedCheck === "monthly" || values.regular_unit === "monthly") ? "text-slate-800 " : "hover:text-slate-800 text-slate-800/50"} font-[700] text-xl`}
                                             onClick={() => {
                                                 setClickedCheck((prev) => prev !== "monthly" ? "monthly" : "")
-                                                if (values.regular_unit === "monthly") setValue("regular_unit", "");
+                                                if (values.regular_unit === "monthly") {
+                                                    setValue("regular_unit", "");
+                                                    setValue("regular_num", undefined);
+                                                }
                                                 else setValue("regular_unit", "monthly");
                                             }}
                                             disabled={isSubmitting}
@@ -324,7 +335,10 @@ export default function NewRecordConfirmPage() {
                                             className={`bg-transparent ${(clickedCheck === "yearly" || values.regular_unit === "yearly") ? "text-slate-800 " : "hover:text-slate-800 text-slate-800/50"} font-[700] text-xl`}
                                             onClick={() => {
                                                 setClickedCheck((prev) => prev !== "yearly" ? "yearly" : "")
-                                                if (values.regular_unit === "yearly") setValue("regular_unit", "");
+                                                if (values.regular_unit === "yearly") {
+                                                    setValue("regular_unit", "");
+                                                    setValue("regular_num", undefined);
+                                                }
                                                 else setValue("regular_unit", "yearly");
                                             }}
                                             disabled={isSubmitting}
@@ -489,7 +503,7 @@ export default function NewRecordConfirmPage() {
                         }
 
                         {(values.type === "income" && errors.root?.message) &&
-                            <div className="w-full rounded-xl bg-red-500/30 px-2 py-1 text-lg text-red-500">
+                            <div className="w-full rounded-xl bg-red-500/30 px-2 py-1 text-lg text-red-500 overflow-y-scroll">
                                 {errors.root.message}
                             </div>
                         }
@@ -498,24 +512,18 @@ export default function NewRecordConfirmPage() {
                             <div className="absolute bottom-0 right-0 left-0 z-0 flex justify-between gap-2">
                                 <button
                                     type="submit"
-                                    className="w-full px-2 py-1 bg-red-500 hover:bg-red-500/50 text-white rounded-md font-[600] text-xl"
+                                    className={`w-full px-2 py-1 ${(isSubmitting && !isSaved) ? "cursor-wait" : (isSubmitting && isSaved) ? "cursor-not-allowed" : "cursor-pointer"} ${isSubmitting ? "bg-red-500/50" : "bg-red-500 hover:bg-red-500/50"} text-white rounded-md font-[600] text-xl`}
                                     disabled={isSubmitting}
                                     onClick={() => {
                                         setValue("isSubmitted", true);
                                         setIsSaved(false);
                                     }}
                                 >
-                                    {(isSubmitting && !isSaved) &&
-                                        <div className="relative z-10 mr-2">
-                                            <FaRegCircle size={32} className="fill-gray-500/30 absolute top-0 right-0 left-0" />
-                                            <AiOutlineLoading size={32} className="fill-gray-500 animate-spin absolute top-0 right-0 left-0" />
-                                        </div>
-                                    }
                                     Submit
                                 </button>
                                 <button
                                     type="submit"
-                                    className="w-full px-2 py-1 bg-gray-500 hover:bg-gray-500/50 text-white rounded-md font-[600] text-xl"
+                                    className={`w-full px-2 py-1 ${(isSubmitting && isSaved) ? "cursor-wait" : (isSubmitting && !isSaved) ? "cursor-not-allowed" : "cursor-pointer"} ${isSubmitting ? "bg-gray-500/50" : "bg-gray-500 hover:bg-gray-500/50"} text-white rounded-md font-[600] text-xl`}
                                     disabled={isSubmitting}
                                     onClick={() => {
                                         setValue("isSubmitted", false);

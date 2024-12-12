@@ -63,18 +63,18 @@ model Record {
   currencyId        String
   resourceId        String?
   countryId         String
-  income_amount     String?
+  income_amount     Float?
   income_categoryId String?
   income_status     String?
-  genreId           String?     
+  genre             String?     
   Items             Items[]
   comment           String?
   totalcost         Float?
-  payment_methodId  String?
-  regular_unitId    String?
-  regular_num       Int 
+  payment_method    String?
+  regular_unit      String?
+  regular_num       Int? 
   isSubmitted       Boolean @default(false)
-  xrateId           String 
+  xrateId           String? 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -84,10 +84,7 @@ model Record {
   incomeresource      IncomeResource?  @relation(fields: [resourceId], references: [id])
   country       Country   @relation(fields: [countryId], references: [id])
   incomecategory  IncomeCategory? @relation(fields: [income_categoryId], references: [id])
-  genre         Genre? @relation(fields: [genreId], references: [id])
-  paymentmethod PaymentMethod? @relation(fields: [payment_methodId], references: [id])
-  regularunit   RegularUnit? @relation(fields: [regular_unitId], references: [id])
-  xrate         XRate @relation(fields: [xrateId], references: [id])
+  xrate         XRate? @relation(fields: [xrateId], references: [id])
 }
 
 model type {
@@ -98,14 +95,18 @@ model type {
 
 model IncomeCategory {
   id            String @id @default(cuid())
-  name          String @unique 
+  name          String @unique
+  resourceId    String
+  resource      IncomeResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
   records       Record[]
+  @@unique([name, resourceId])
 }
 
 model IncomeResource {
   id            String @id @default(cuid())
   name          String @unique
   records       Record[]
+  categories    IncomeCategory[]
 }
 
 model Category {
@@ -135,12 +136,6 @@ model Country {
   records       Record[]
 }
 
-model Genre {
-  id            String @id @default(cuid())
-  name          String @unique
-  records       Record[]
-}
-
 model Items {
   id            String  @id @default(cuid())
   item          String 
@@ -154,18 +149,6 @@ model Items {
   record        Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-}
-
-model PaymentMethod {
-  id            String  @id @default(cuid())
-  name          String  @unique
-  records       Record[]
-}
-
-model RegularUnit {
-  id            String  @id @default(cuid())
-  name          String  @unique
-  records       Record[]
 }
 
 model XRate {
