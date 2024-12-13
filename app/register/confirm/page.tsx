@@ -10,6 +10,7 @@ import { useFormContext } from "react-hook-form";
 import { useState } from "react";
 import { NewRecordType } from "../layout";
 import Link from "next/link";
+import Image from "next/image";
 
 export type Items = {
     item?: string;
@@ -42,22 +43,6 @@ export default function NewRecordConfirmPage() {
     // Submit the new record to db
     const onSubmit = handleSubmit(async (data) => {
         try {
-            // const formData = new FormData();
-            // Object.entries(data).forEach(([key, value]) => {
-            //     if (value === null || value === undefined) {
-            //         formData.append(key, ""); // Handle null/undefined values
-            //     } else if (value instanceof Date) {
-            //         formData.append(key, value.toISOString()); // Convert Date to ISO string
-            //     } else if (typeof value === "object" && !Array.isArray(value)) {
-            //         // If the value is an object, stringify it (customize if needed)
-            //         formData.append(key, JSON.stringify(value));
-            //     } else {
-            //         formData.append(key, value.toString()); // Convert other types to string
-            //     }
-            // });
-
-            // console.log(JSON.stringify(data));
-
             const response = await fetch("./api/new-record", {
                 method: "POST",
                 body: JSON.stringify(data),
@@ -69,14 +54,9 @@ export default function NewRecordConfirmPage() {
             if (!response.ok) {
                 const result = await response.json();
                 console.log({ mesage: result.message });
-                setError("root", {type: "custom", message: result.message});
+                setError("root", { type: "custom", message: result.message });
             }
-            // if (!response.ok) {
-            //     // setError ("root", {type: "custom", message: response.message});
-            //     setErrorMessagePopUp(true);
-            // } else {
-            //     router.push(paths.home());
-            // }
+
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError("root", { type: "custom", message: err.message });
@@ -372,9 +352,22 @@ export default function NewRecordConfirmPage() {
                                 <span>Back to the form page</span>
                             </button>
                         </div>
-                        <div className="w-full h-full bg-gray-500 flex items-center justify-center rounded-md gap-2">
-                            <CiImageOff size={48} className="fill-white" />
-                            <span className="font-[700] text-white text-xl">No Content</span>
+                        <div className={`${values.object && "relative border-2 border-gray-500/30 border-solid"} w-full h-full bg-gray-500 flex items-center justify-center rounded-md gap-2`}>
+                            {values.object ? 
+                                <div className="absolute inset-0">
+                                    <Image 
+                                        src={values.object}
+                                        alt="Record Image"
+                                        fill
+                                        className="object-cover rounded-md"
+                                    />
+                                </div>
+                            :
+                                <>
+                                    <CiImageOff size={48} className="fill-white" />
+                                    <span className="font-[700] text-white text-xl">No Content</span>
+                                </>
+                            }
                         </div>
 
                         <div className="w-full h-[100px] overflow-y-scroll no-scrollbar bg-white/50 rounded-md p-2">

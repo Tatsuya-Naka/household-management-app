@@ -1,0 +1,78 @@
+"use client";
+
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useFormContext } from "react-hook-form";
+import { IoReceiptOutline } from "react-icons/io5";
+import { v4 as uuid } from "uuid";
+
+export default function RecordImage() {
+    const { setValue, setError, formState: { isSubmitting } } = useFormContext();
+    const imageId = uuid();
+    const [image, setImage] = useState("");
+
+    const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        e.preventDefault();
+        const files = e.currentTarget.files;
+        if (files && files.length > 0 && files[0]) {
+            const file = files[0];
+            // const response = await recordImageUrl(file, imageId);
+            console.log({ filetypeBefore: file.type });
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("imageId", imageId);
+            console.log(formData);
+            const response = await fetch("./api/new-record/image", {
+                method: "POST",
+                // mutipart/form-data
+                body: formData,
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                setError("object", result.message);
+            }
+
+            setImage(result.url);
+
+            // if (response.success?.isSuccess) {
+            //     const success = response.success;
+            //     setImage(success.url || "");
+            //     console.log("Successfully get the presignedUrl");
+            // }
+            // console.log("Awesome");
+            console.log({ imageURL: image });
+        }
+    };
+
+    useEffect(() => {
+        setValue("object", image);
+    }, [image, setValue])
+
+    return (
+        <label className={`${image && "border-2 border-solid border-gray-500/30"} relative overflow-hidden mb-3 h-[240px] flex items-start justify-center bg-gradient-to-r from-sky-300 via-violet-300 to-pink-100 w-full rounded-lg cursor-pointer hover:opacity-80`}>
+            {image ?
+                <div className="absolute inset-0">
+
+                    <Image
+                        src={image}
+                        alt={"Record Image"}
+                        fill
+                        className="object-cover rounded-lg"
+                    />
+                </div>
+                :
+                <div className="w-full flex items-center justify-center h-full">
+                    <IoReceiptOutline size={48} className="fill-black mr-3" />
+                    <span>Upload image</span>
+                </div>
+            }
+            <input
+                type="file"
+                hidden
+                name="object"
+                onChange={handleImageFile}
+                disabled={isSubmitting}
+            />
+        </label>
+    )
+}

@@ -5,13 +5,13 @@ import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-    try {        
+    try {
         const body = await req.json();
-        
+
         const session = await auth();
 
         if (!session || !session.user || !session.user.id) {
-            return NextResponse.json({message: "You must signup or login before doing this"}, {status: 404});
+            return NextResponse.json({ message: "You must signup or login before doing this" }, { status: 404 });
         }
 
         // get typeId from db
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
             }
         });
         if (!type) {
-            return NextResponse.json({message: "Invalid type name"}, {status: 404});
+            return NextResponse.json({ message: "Invalid type name" }, { status: 404 });
         }
 
         // currency
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         });
 
         if (!currency) {
-            return NextResponse.json({message: "Invalid currency type"}, {status: 404});
+            return NextResponse.json({ message: "Invalid currency type" }, { status: 404 });
         }
 
         // Country id
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
         });
 
         if (!country) {
-            return NextResponse.json({message: "Invalid country"}, {status: 404});
+            return NextResponse.json({ message: "Invalid country" }, { status: 404 });
         }
 
         // create recordId now for items
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
                 countryId: country.id,
             }
         });
-        
+
         if (type.name === "income") {
             // income resource
             const resource = await db.incomeResource.findUnique({
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
             });
 
             if (!resource) {
-                return NextResponse.json({message: "Invalid resource type"}, {status: 404});
+                return NextResponse.json({ message: "Invalid resource type" }, { status: 404 });
             }
 
             // income category belogging to the income resource
@@ -88,13 +88,13 @@ export async function POST(req: NextRequest) {
                     resourceId: resource.id,
                 }
             });
-            
+
             if (!category) {
-                return NextResponse.json({message: "Invalid income category type"}, {status: 404});
+                return NextResponse.json({ message: "Invalid income category type" }, { status: 404 });
             }
 
             if (body.regular_unit && !body.regular_num) {
-                return NextResponse.json({message: "Please fill in the number of frequency of the regular income"}, {status: 404})
+                return NextResponse.json({ message: "Please fill in the number of frequency of the regular income" }, { status: 404 })
             }
 
             if (!body.regular_unit && body.regular_num) {
@@ -102,11 +102,9 @@ export async function POST(req: NextRequest) {
             }
 
             if (!body.status) {
-                return NextResponse.json({message: "Choose status"}, {status: 404});
+                return NextResponse.json({ message: "Choose status" }, { status: 404 });
             }
 
-            // TODO: Image and store it to AWS S3.
-            
             await db.record.update({
                 where: {
                     id: record.id,
@@ -119,26 +117,81 @@ export async function POST(req: NextRequest) {
                     income_status: body.status,
                     income_amount: body.income_amount,
                     comment: body.comment,
+                    object: body.object,
                 }
             });
         } else if (body.type === "expenses") {
-            // TODO: CategoryID
-            // TODO: SubCategory ID
+            // Item with categoryID & subcategoryID
+            for (const { item, category, subcategory, amount, cost } of body.items) {
+                if (!category) {
+                    return NextResponse.json({ message: "Missing Category" }, { status: 404 });
+                }
+
+                const categoryDoc = await db.category.findUnique({
+                    select: {
+                        id: true,
+                    },
+                    where: {
+                        name: category,
+                    }
+                });
+
+                if (!categoryDoc) {
+                    return NextResponse.json({ message: "Missing Categoroies" }, { status: 404 });
+                }
+
+                let subcategoryId: string | null = null;
+                if (subcategory) {
+                    const subCategoryDoc = await db.subCategory.findUnique({
+                        select: {
+                            id: true,
+                        },
+                        where: {
+                            name: subcategory,
+                            categoryId: categoryDoc.id,
+                        }
+                    });
+                    if (!subCategoryDoc) {
+                        const createSubcategory = await db.subCategory.create({
+                            data: {
+                                name: subcategory,
+                                categoryId: categoryDoc.id,
+                            }
+                        });
+                        subcategoryId = createSubcategory.id;
+                    } else {
+                        subcategoryId = subCategoryDoc.id;
+                    }
+                }
+                
+                await db.items.create({
+                    data: {
+                        item,
+                        categoryId: categoryDoc.id,
+                        subcategoryId: !!subcategoryId ? subcategoryId : null,
+                        amount,
+                        cost,
+                        recordId: record.id,
+                    }
+                });
+            }
             // TODO: Receipt Image
+            console.log({Object: body.object});
+            console.log({body: body});
+
             // TODO: fetch FX rate
-            // TODO: create Items
             // TODO: update record
         }
 
-        return NextResponse.json({message: "Success"}, {status: 200});
+        return NextResponse.json({ message: "Success" }, { status: 200 });
 
     } catch (err: unknown) {
         if (err instanceof Error) {
             console.log(err.message);
-            return NextResponse.json({message: err.message}, {status: 500});
+            return NextResponse.json({ message: err.message }, { status: 500 });
         } else {
             console.log("Went Wrong");
-            return NextResponse.json({message: "Something Went Wrong on the Server Side"}, {status: 500});
+            return NextResponse.json({ message: "Something Went Wrong on the Server Side" }, { status: 500 });
         }
     }
 }

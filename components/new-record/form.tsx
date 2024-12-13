@@ -10,13 +10,13 @@ import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs, { Dayjs } from "dayjs";
 import { MdOutlineAdd } from "react-icons/md";
 import { BsTrash } from "react-icons/bs";
-import { IoReceiptOutline } from "react-icons/io5";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import paths from "@/paths";
 import { Items } from "@/app/register/confirm/page";
 import { NewRecordType } from "@/app/register/layout";
+import RecordImage from "./receiptImage";
 
 export default function NewRegisterForm() {
     const { data: session } = useSession();
@@ -54,10 +54,6 @@ export default function NewRegisterForm() {
             setValue("country", ["Australia", "Japan", "US", "Europe"].includes(session.user.location) ? session.user.location as "Australia" | "Japan" | "US" | "Europe" : "Australia");
         }
     }, [session?.user, setValue]);
-
-    // const [rows, setRows] = useState<FormRow[]>([
-    //     { id: uuid(), item: "", category: "", subcategory: "", amount: 0, cost: 0 }
-    // ]);
 
     const currencies = ["AUD", "JPY", "USD", "EUR"];
     const countries = ["Australia", "Japan", "US", "Europe"];
@@ -479,18 +475,9 @@ export default function NewRegisterForm() {
 
             {/* Image, Memo, Confirm Button */}
             <div className="flex items-center pt-10 w-full flex-col ">
-                <label className="mb-3 h-[240px] flex items-start justify-center bg-gradient-to-r from-sky-300 via-violet-300 to-pink-100 w-full rounded-lg cursor-pointer hover:opacity-80">
-                    <div className="w-full flex items-center justify-center h-full">
-                        <IoReceiptOutline size={48} className="fill-black mr-3" />
-                        <span>Upload image</span>
-                    </div>
-                    {/* <input
-                        type="file"
-                        hidden
-                        {...register("object")}
-                        disabled={isSubmitting}
-                    /> */}
-                </label>
+                {/* Record Image */}
+                <RecordImage />
+
                 <label className="w-full">
                     <span className="font-[600] text-base text-slate-800">Comment</span>
                     <textarea
@@ -499,6 +486,7 @@ export default function NewRegisterForm() {
                         disabled={isSubmitting}
                     />
                 </label>
+
                 <button
                     type="submit"
                     className={`w-full rounded-lg px-3 py-2 ${isSubmitting ? "bg-orange-400/50" : "bg-orange-400 hover:bg-orange-400/50"} text-white font-[700]`}

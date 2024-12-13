@@ -37,7 +37,7 @@ export const CombinedSchema = z.object({
         })
     ).nullable(),
     comment: z.string().optional(),
-    // object: z.string().url().nullable(),
+    object: z.string().url().nullable(),
     total: z.number(),
     payment_method: z.string().optional(),
 
