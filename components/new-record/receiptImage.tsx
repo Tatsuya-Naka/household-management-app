@@ -4,12 +4,11 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { IoReceiptOutline } from "react-icons/io5";
-import { v4 as uuid } from "uuid";
 
 export default function RecordImage() {
-    const { setValue, setError, formState: { isSubmitting } } = useFormContext();
-    const imageId = uuid();
-    const [image, setImage] = useState("");
+    const { getValues, setValue, setError, formState: { isSubmitting } } = useFormContext();
+    const values = getValues();
+    const [image, setImage] = useState(values.object ? `${values.object}?noCache=${Date.now()}` : "" );
 
     const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
@@ -20,7 +19,7 @@ export default function RecordImage() {
             console.log({ filetypeBefore: file.type });
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("imageId", imageId);
+            formData.append("imageId", values.imageId);
             console.log(formData);
             const response = await fetch("./api/new-record/image", {
                 method: "POST",
@@ -32,14 +31,8 @@ export default function RecordImage() {
                 setError("object", result.message);
             }
 
-            setImage(result.url);
+            setImage(`${result.url}?noCahche=${Date.now()}`);
 
-            // if (response.success?.isSuccess) {
-            //     const success = response.success;
-            //     setImage(success.url || "");
-            //     console.log("Successfully get the presignedUrl");
-            // }
-            // console.log("Awesome");
             console.log({ imageURL: image });
         }
     };

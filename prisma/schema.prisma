@@ -78,6 +78,7 @@ model Record {
   xrateId           String? 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  date              String
 
   user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
   type          type @relation(fields: [typeId], references: [id])
@@ -154,11 +155,22 @@ model Items {
 
 model XRate {
   id            String @id @default(cuid())
+  date          String @unique
   base          String @unique
   aud           Float
   jpy           Float 
   usd           Float 
-  eur           Float 
+  eur           Float
+  gbp           Float 
+  cad           Float 
+  chf           Float 
+  cny           Float 
+  hkd           Float 
+  krw           Float 
+  mxn           Float 
+  nzd           Float 
+  sgd           Float 
+  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   records       Record[]

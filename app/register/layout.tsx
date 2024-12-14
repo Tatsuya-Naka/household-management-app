@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { v4 as uuid } from "uuid";
 
 export type NewRecordType = z.infer<typeof CombinedSchema>
 
@@ -17,7 +18,8 @@ export default function NewRecordLayout({ children }: { children: React.ReactNod
             items: [{ item: "", category: "", subcategory: "", amount: 0, cost: 0 }],
             comment: "",
             total: 0,
-            regular_unit: "", isSubmitted: false
+            regular_unit: "", isSubmitted: false,
+            imageId: uuid(), 
         },
         resolver: zodResolver(CombinedSchema),
     });

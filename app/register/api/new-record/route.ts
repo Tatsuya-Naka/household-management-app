@@ -3,11 +3,15 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
+import dayjs from "dayjs";
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-
+        const date = dayjs(body.date).format("YYYY-MM-DD");
+        if (!date) {
+            return NextResponse.json({message: "You must select the date"}, {status: 400});
+        }
         const session = await auth();
 
         if (!session || !session.user || !session.user.id) {
@@ -25,7 +29,7 @@ export async function POST(req: NextRequest) {
             }
         });
         if (!type) {
-            return NextResponse.json({ message: "Invalid type name" }, { status: 404 });
+            return NextResponse.json({ message: "Invalid type name" }, { status: 400 });
         }
 
         // currency
@@ -39,7 +43,7 @@ export async function POST(req: NextRequest) {
         });
 
         if (!currency) {
-            return NextResponse.json({ message: "Invalid currency type" }, { status: 404 });
+            return NextResponse.json({ message: "Invalid currency type" }, { status: 400 });
         }
 
         // Country id
@@ -52,7 +56,45 @@ export async function POST(req: NextRequest) {
         });
 
         if (!country) {
-            return NextResponse.json({ message: "Invalid country" }, { status: 404 });
+            return NextResponse.json({ message: "Invalid country" }, { status: 400 });
+        }
+
+        // TODO: fetch FX rate
+        let xrateId: string;
+        const fxrateDate = await db.xRate.findUnique({
+            where: { date, }
+        });
+        if (!fxrateDate) {
+            const response = await fetch(`https://data.fixer.io/api/${date}?access_key=${process.env.FIXER_API_KEY}&format=1`);
+            console.log({ FX: response });
+            const fxrate = await response.json();
+            console.log({ ResolvedJson: fxrate });
+            console.log({ JPY: fxrate.rates.JPY });
+            console.log({ base: fxrate.base });
+
+            const create = await db.xRate.create({
+                data: {
+                    date: date,
+                    base: fxrate.base,
+                    aud: fxrate.rates.AUD,
+                    jpy: fxrate.rates.JPY,
+                    usd: fxrate.rates.USD,
+                    eur: fxrate.rates.EUR,
+                    gbp: fxrate.rates.GBP,
+                    cad: fxrate.rates.CAD,
+                    chf: fxrate.rates.CHF,
+                    cny: fxrate.rates.CNY,
+                    hkd: fxrate.rates.HKD,
+                    krw: fxrate.rates.KRW,
+                    mxn: fxrate.rates.MXN,
+                    nzd: fxrate.rates.NZD,
+                    sgd: fxrate.rates.SGD,
+                }
+            });
+            console.log({FXrate: create});
+            xrateId = create.id;
+        } else {
+            xrateId = fxrateDate.id;
         }
 
         // create recordId now for items
@@ -62,6 +104,8 @@ export async function POST(req: NextRequest) {
                 typeId: type.id,
                 currencyId: currency.id,
                 countryId: country.id,
+                date,
+                xrateId,
             }
         });
 
@@ -76,7 +120,7 @@ export async function POST(req: NextRequest) {
             });
 
             if (!resource) {
-                return NextResponse.json({ message: "Invalid resource type" }, { status: 404 });
+                return NextResponse.json({ message: "Invalid resource type" }, { status: 400 });
             }
 
             // income category belogging to the income resource
@@ -90,11 +134,11 @@ export async function POST(req: NextRequest) {
             });
 
             if (!category) {
-                return NextResponse.json({ message: "Invalid income category type" }, { status: 404 });
+                return NextResponse.json({ message: "Invalid income category type" }, { status: 400 });
             }
 
             if (body.regular_unit && !body.regular_num) {
-                return NextResponse.json({ message: "Please fill in the number of frequency of the regular income" }, { status: 404 })
+                return NextResponse.json({ message: "Please fill in the number of frequency of the regular income" }, { status: 400 })
             }
 
             if (!body.regular_unit && body.regular_num) {
@@ -102,7 +146,7 @@ export async function POST(req: NextRequest) {
             }
 
             if (!body.status) {
-                return NextResponse.json({ message: "Choose status" }, { status: 404 });
+                return NextResponse.json({ message: "Choose status" }, { status: 400 });
             }
 
             await db.record.update({
@@ -124,7 +168,7 @@ export async function POST(req: NextRequest) {
             // Item with categoryID & subcategoryID
             for (const { item, category, subcategory, amount, cost } of body.items) {
                 if (!category) {
-                    return NextResponse.json({ message: "Missing Category" }, { status: 404 });
+                    return NextResponse.json({ message: "Missing Category" }, { status: 400 });
                 }
 
                 const categoryDoc = await db.category.findUnique({
@@ -137,7 +181,7 @@ export async function POST(req: NextRequest) {
                 });
 
                 if (!categoryDoc) {
-                    return NextResponse.json({ message: "Missing Categoroies" }, { status: 404 });
+                    return NextResponse.json({ message: "Missing Categoroies" }, { status: 400 });
                 }
 
                 let subcategoryId: string | null = null;
@@ -163,7 +207,7 @@ export async function POST(req: NextRequest) {
                         subcategoryId = subCategoryDoc.id;
                     }
                 }
-                
+
                 await db.items.create({
                     data: {
                         item,
@@ -175,12 +219,23 @@ export async function POST(req: NextRequest) {
                     }
                 });
             }
-            // TODO: Receipt Image
-            console.log({Object: body.object});
-            console.log({body: body});
 
-            // TODO: fetch FX rate
-            // TODO: update record
+            // Update record for expenses
+            await db.record.update({
+                where: {
+                    id: record.id,
+                },
+                data: {
+                    genre: body.genre,
+                    object: body.object,
+                    comment: body.comment,
+                    totalcost: body.total,
+                    payment_method: body.payment_method,
+                    regular_unit: body.regular_unit,
+                    regular_num: body.regular_num,
+                    isSubmitted: body.isSubmitted,
+                }
+            })
         }
 
         return NextResponse.json({ message: "Success" }, { status: 200 });

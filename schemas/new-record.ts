@@ -37,7 +37,7 @@ export const CombinedSchema = z.object({
         })
     ).nullable(),
     comment: z.string().optional(),
-    object: z.string().url().nullable(),
+    object: z.string().url().or(z.string().optional()),
     total: z.number(),
     payment_method: z.string().optional(),
 
@@ -45,6 +45,8 @@ export const CombinedSchema = z.object({
     regular_num: z.number().optional(),
 
     isSubmitted: z.boolean(),
+
+    imageId: z.string(),
 
 }).refine((data) => {
     if (data.type === "expenses") {
