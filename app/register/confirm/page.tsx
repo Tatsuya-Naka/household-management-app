@@ -52,13 +52,11 @@ export default function NewRecordConfirmPage() {
                     },
                 });
 
-                if (!response.ok) {
-                    const result = await response.json();
-                    setError("root", { type: "custom", message: result.message });
-                    setErrorMessagePopUp(true)
-                } else {
-                    router.push(paths.home());
-                }
+                if (response.ok) router.push(paths.home());
+                
+                const result = await response.json();
+                setError("root", { type: "custom", message: result.message });
+                setErrorMessagePopUp(true)
 
             } catch (err: unknown) {
                 if (err instanceof Error) {
@@ -89,7 +87,7 @@ export default function NewRecordConfirmPage() {
 
             <main className='max-w-[1560px] h-[calc(100vh-56px)] mx-auto relative' onSubmit={onSubmit}>
                 {(values.type === "expenses" && errors.root?.message && errorMessagePopUp) &&
-                    <div className="rounded-xl bg-red-100 px-3 py-3 text-lg text-red-500 absolute top-[100px] left-auto right-10 w-[400px]">
+                    <div className="rounded-xl bg-red-100 px-3 py-3 text-lg text-red-500 absolute top-[100px] left-auto right-10 w-[400px] z-[999]">
                         <div className="flex flex-col items-start justify-center gap-1">
                             <div className="flex items-center justify-between w-full">
                                 <h2>Error</h2>
@@ -567,7 +565,8 @@ export default function NewRecordConfirmPage() {
                                 <button
                                     type="button"
                                     className="w-full px-2 py-1 bg-gray-500 text-center hover:bg-gray-500/50 text-white font-[700] rounded-lg cursor-pointer"
-                                    onClick={() => {setIsLeaving(false)
+                                    onClick={() => {
+                                        setIsLeaving(false)
                                         setValue("isConfirmed", false);
                                     }}
                                 >

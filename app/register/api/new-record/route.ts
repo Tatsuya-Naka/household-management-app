@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import dayjs from "dayjs";
 import { sqsSendReceiveMessage } from "@/data/sendReceiveMessage";
+import paths from "@/paths";
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
