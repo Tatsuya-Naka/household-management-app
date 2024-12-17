@@ -13,7 +13,7 @@ interface sqsSendMessageState {
     }
 }
 
-export async function sqsSendReceiveMessage(url: string, userId: string): Promise<sqsSendMessageState> {
+export async function sqsSendReceiveMessage(url: string): Promise<sqsSendMessageState> {
     "use server";
     try {
         if (!process.env.SQS_QUEUE_URL || !process.env.SQS_RECEIVE_URL) {
@@ -86,6 +86,8 @@ export async function sqsSendReceiveMessage(url: string, userId: string): Promis
 
             await sqs.send(deleteCommand);
         }
+
+        console.log({NewUrl: newUrl});
 
         return {
             errors: {},

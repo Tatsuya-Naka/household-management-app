@@ -188,11 +188,16 @@ export async function POST(req: NextRequest) {
             }
 
             // TODO: Send SQS -> S3 A image transfered to S3 B bucket -> image in S3 A delete in 24 hours. get url to access image.
-            let imageUrl: string = body.object;
+            let imageUrl: string;
             if (body.object) {
-                const formState = await sqsSendReceiveMessage(body.object, session.user.id);
-                
-                imageUrl = formState.success?.url || "";
+                const formState = await sqsSendReceiveMessage(body.object);
+                if (formState.success && formState.success.url) {
+                    imageUrl = formState.success.url;
+                } else {
+                    imageUrl = body.object;
+                }
+            } else {
+                imageUrl = body.object;
             }
 
             await db.record.update({
@@ -282,11 +287,18 @@ export async function POST(req: NextRequest) {
             }
 
             // TODO: Send SQS -> S3 A image transfered to S3 B bucket -> image in S3 A delete in 24 hours. get url to access image.
-            let imageUrl: string = body.object;
+            let imageUrl: string;
             if (body.object) {
-                const formState = await sqsSendReceiveMessage(body.object, session.user.id);
-                imageUrl = formState.success?.url || "";
-            } 
+                const formState = await sqsSendReceiveMessage(body.object);
+                if (formState.success && formState.success.url) {
+                    imageUrl = formState.success.url;
+                } else {
+                    imageUrl = body.object
+                }
+            } else {
+                imageUrl = body.object
+            }
+
             // Update record for expenses
             await db.record.update({
                 where: {
