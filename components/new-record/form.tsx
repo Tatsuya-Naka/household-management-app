@@ -25,7 +25,6 @@ export default function NewRegisterForm() {
     const { register, handleSubmit, control, getValues, setValue, formState: { errors, isSubmitting } } = useFormContext<NewRecordType>();
     const values = getValues();
 
-    console.log("Errors: ", errors);
     const onSubmit = handleSubmit(() => {
         if (values.items) {
             const items = values.items;

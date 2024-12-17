@@ -12,7 +12,6 @@ export default function LogInForm() {
     const [formState, action] = useActionState(actions.login, { errors: {} });
 
     const onClick = (provider: "google" | "twitter" | "apple") => {
-        console.log(provider);
         // TODO: Activate OAuth providers: gogole, twitter, apple for signin
         signIn(provider, {
             callbackUrl: DEFAULT_LOGIN_REDIRECT

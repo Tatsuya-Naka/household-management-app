@@ -75,8 +75,6 @@ export default function DashboardGraph() {
     const [isFrom, setIsFrom] = useState(false);
     const [isTo, setIsTo] = useState(false);
 
-    console.log("From: ", dayjs(fromDate).toDate());
-
     const [calendar, setCalendar] = useState(false);
 
     const handleDateChange = (newValue: Dayjs | null) => {

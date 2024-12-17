@@ -54,7 +54,6 @@ export default function NewRecordConfirmPage() {
 
                 if (!response.ok) {
                     const result = await response.json();
-                    console.log({ mesage: result.message });
                     setError("root", { type: "custom", message: result.message });
                     setErrorMessagePopUp(true)
                 } else {

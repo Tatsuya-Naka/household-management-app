@@ -15,12 +15,11 @@ export default function RecordImage() {
         const files = e.currentTarget.files;
         if (files && files.length > 0 && files[0]) {
             const file = files[0];
-            // const response = await recordImageUrl(file, imageId);
-            console.log({ filetypeBefore: file.type });
+
             const formData = new FormData();
             formData.append("file", file);
             formData.append("imageId", values.imageId);
-            console.log(formData);
+
             const response = await fetch("./api/new-record/image", {
                 method: "POST",
                 // mutipart/form-data
@@ -32,8 +31,6 @@ export default function RecordImage() {
             }
 
             setImage(`${result.url}?noCahche=${Date.now()}`);
-
-            console.log({ imageURL: image });
         }
     };
 

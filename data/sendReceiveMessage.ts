@@ -47,8 +47,7 @@ export async function sqsSendReceiveMessage(url: string, userId: string): Promis
             },
             MessageBody: "Send the message from the local place to sqs!!"
         });
-        const response = await sqs.send(command);
-        console.log("Message is sent to SQS to trigger lambda function!: ", response);
+        await sqs.send(command);
 
         // TODO: receive message from sqs to get the url of the image store in S3 bucket B
         // TODO: create another SQS to send the response from the lambda function in case if there are loop by sending the sqs, which is used for triggering lambda.
@@ -86,7 +85,6 @@ export async function sqsSendReceiveMessage(url: string, userId: string): Promis
             });
 
             await sqs.send(deleteCommand);
-            console.log("Message Successfully deleted from the sqs");
         }
 
         return {

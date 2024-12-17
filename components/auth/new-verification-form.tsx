@@ -16,7 +16,6 @@ export default function VerificationForm() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        console.log("Token: ", token);
         if (token) {
             (async () => {
                 try {
