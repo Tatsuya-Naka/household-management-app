@@ -51,12 +51,13 @@ export default function NewRecordConfirmPage() {
                         "Content-Type": "application/json",
                     },
                 });
-
-                if (response.ok) router.push(paths.home());
+                if (!response.ok) {
+                    const result = await response.json();
+                    setError("root", { type: "custom", message: result.message });
+                    setErrorMessagePopUp(true)
+                }
                 
-                const result = await response.json();
-                setError("root", { type: "custom", message: result.message });
-                setErrorMessagePopUp(true)
+                if (response.ok) router.push(paths.home());
 
             } catch (err: unknown) {
                 if (err instanceof Error) {
