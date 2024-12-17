@@ -19,7 +19,7 @@ export default function NewRecordLayout({ children }: { children: React.ReactNod
             comment: "",
             total: 0,
             regular_unit: "", isSubmitted: false,
-            imageId: uuid(), 
+            imageId: uuid(), isConfirmed: false,
         },
         resolver: zodResolver(CombinedSchema),
     });

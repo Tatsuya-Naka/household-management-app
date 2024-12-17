@@ -47,6 +47,7 @@ export const CombinedSchema = z.object({
     isSubmitted: z.boolean(),
 
     imageId: z.string(),
+    isConfirmed: z.boolean(),
 
 }).refine((data) => {
     if (data.type === "expenses") {

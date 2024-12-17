@@ -21,9 +21,9 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        if (process.env.AUTH_AWSS3_BUCKET && process.env.AUTH_NEWRECORD_PATH && imageId) {
+        if (process.env.AUTH_AWSS3_BUCKET_TEMP && process.env.AUTH_NEWRECORD_PATH && imageId) {
             const params = new PutObjectCommand({
-                Bucket: process.env.AUTH_AWSS3_BUCKET,
+                Bucket: process.env.AUTH_AWSS3_BUCKET_TEMP,
                 Key: `${process.env.AUTH_NEWRECORD_PATH}/${session.user.id}/${imageId}`,
                 ContentType: file.type,
             });
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
             }
 
             if (process.env.AWSS3_REGION) {
-                const imageUrl = `https://${process.env.AUTH_AWSS3_BUCKET}.s3.${process.env.AWSS3_REGION}.amazonaws.com/${process.env.AUTH_NEWRECORD_PATH}/${session.user.id}/${imageId}`;
+                const imageUrl = `https://${process.env.AUTH_AWSS3_BUCKET_TEMP}.s3.${process.env.AWSS3_REGION}.amazonaws.com/${process.env.AUTH_NEWRECORD_PATH}/${session.user.id}/${imageId}`;
                 return NextResponse.json({ message: "Success", url: imageUrl, fileType: file.type }, { status: 200 });
             }
         }

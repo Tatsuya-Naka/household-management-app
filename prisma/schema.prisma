@@ -156,7 +156,7 @@ model Items {
 model XRate {
   id            String @id @default(cuid())
   date          String @unique
-  base          String @unique
+  base          String 
   aud           Float
   jpy           Float 
   usd           Float 

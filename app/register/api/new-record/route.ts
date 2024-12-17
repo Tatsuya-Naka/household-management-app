@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import dayjs from "dayjs";
-
+import { sqsSendReceiveMessage } from "@/data/sendReceiveMessage";
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
@@ -43,6 +43,11 @@ export async function POST(req: NextRequest) {
         });
 
         if (!currency) {
+            // const create = await db.currency.create({
+            //     data: {
+            //         name: body.currency
+            //     }
+            // });
             return NextResponse.json({ message: "Invalid currency type" }, { status: 400 });
         }
 
@@ -56,6 +61,11 @@ export async function POST(req: NextRequest) {
         });
 
         if (!country) {
+            // const create = await db.country.create({
+            //     data: {
+            //         name: body.country,
+            //     }
+            // })
             return NextResponse.json({ message: "Invalid country" }, { status: 400 });
         }
 
@@ -66,11 +76,7 @@ export async function POST(req: NextRequest) {
         });
         if (!fxrateDate) {
             const response = await fetch(`https://data.fixer.io/api/${date}?access_key=${process.env.FIXER_API_KEY}&format=1`);
-            console.log({ FX: response });
             const fxrate = await response.json();
-            console.log({ ResolvedJson: fxrate });
-            console.log({ JPY: fxrate.rates.JPY });
-            console.log({ base: fxrate.base });
 
             const create = await db.xRate.create({
                 data: {
@@ -91,7 +97,7 @@ export async function POST(req: NextRequest) {
                     sgd: fxrate.rates.SGD,
                 }
             });
-            console.log({FXrate: create});
+            
             xrateId = create.id;
         } else {
             xrateId = fxrateDate.id;
@@ -120,6 +126,16 @@ export async function POST(req: NextRequest) {
             });
 
             if (!resource) {
+                // const resourceNew = await db.incomeResource.create({
+                //     data: {
+                //         name: body.resource,
+                //     }
+                // });
+                await db.record.delete({
+                    where: {
+                        id: record.id,
+                    }
+                });
                 return NextResponse.json({ message: "Invalid resource type" }, { status: 400 });
             }
 
@@ -134,10 +150,26 @@ export async function POST(req: NextRequest) {
             });
 
             if (!category) {
+                // const newCategory = await db.incomeCategory.create({
+                //     data: {
+                //         resourceId: resource.id,
+                //         name: body.income_category,
+                //     }
+                // })
+                await db.record.delete({
+                    where: {
+                        id: record.id,
+                    }
+                });
                 return NextResponse.json({ message: "Invalid income category type" }, { status: 400 });
             }
 
             if (body.regular_unit && !body.regular_num) {
+                await db.record.delete({
+                    where: {
+                        id: record.id,
+                    }
+                });
                 return NextResponse.json({ message: "Please fill in the number of frequency of the regular income" }, { status: 400 })
             }
 
@@ -146,7 +178,20 @@ export async function POST(req: NextRequest) {
             }
 
             if (!body.status) {
+                await db.record.delete({
+                    where: {
+                        id: record.id,
+                    }
+                });
                 return NextResponse.json({ message: "Choose status" }, { status: 400 });
+            }
+
+            // TODO: Send SQS -> S3 A image transfered to S3 B bucket -> image in S3 A delete in 24 hours. get url to access image.
+            let imageUrl: string = body.object;
+            if (body.object) {
+                const formState = await sqsSendReceiveMessage(body.object, session.user.id);
+                
+                imageUrl = formState.success?.url || "";
             }
 
             await db.record.update({
@@ -161,13 +206,18 @@ export async function POST(req: NextRequest) {
                     income_status: body.status,
                     income_amount: body.income_amount,
                     comment: body.comment,
-                    object: body.object,
+                    object: imageUrl,
                 }
             });
         } else if (body.type === "expenses") {
             // Item with categoryID & subcategoryID
             for (const { item, category, subcategory, amount, cost } of body.items) {
                 if (!category) {
+                    await db.record.delete({
+                        where: {
+                            id: record.id,
+                        }
+                    });
                     return NextResponse.json({ message: "Missing Category" }, { status: 400 });
                 }
 
@@ -181,6 +231,16 @@ export async function POST(req: NextRequest) {
                 });
 
                 if (!categoryDoc) {
+                    // const create = await db.category.create({
+                    //     data: {
+                    //         name: category,
+                    //     }
+                    // })
+                    await db.record.delete({
+                        where: {
+                            id: record.id,
+                        }
+                    });
                     return NextResponse.json({ message: "Missing Categoroies" }, { status: 400 });
                 }
 
@@ -220,6 +280,12 @@ export async function POST(req: NextRequest) {
                 });
             }
 
+            // TODO: Send SQS -> S3 A image transfered to S3 B bucket -> image in S3 A delete in 24 hours. get url to access image.
+            let imageUrl: string = body.object;
+            if (body.object) {
+                const formState = await sqsSendReceiveMessage(body.object, session.user.id);
+                imageUrl = formState.success?.url || "";
+            } 
             // Update record for expenses
             await db.record.update({
                 where: {
@@ -227,7 +293,7 @@ export async function POST(req: NextRequest) {
                 },
                 data: {
                     genre: body.genre,
-                    object: body.object,
+                    object: imageUrl,
                     comment: body.comment,
                     totalcost: body.total,
                     payment_method: body.payment_method,
@@ -242,10 +308,8 @@ export async function POST(req: NextRequest) {
 
     } catch (err: unknown) {
         if (err instanceof Error) {
-            console.log(err.message);
             return NextResponse.json({ message: err.message }, { status: 500 });
         } else {
-            console.log("Went Wrong");
             return NextResponse.json({ message: "Something Went Wrong on the Server Side" }, { status: 500 });
         }
     }

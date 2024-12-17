@@ -42,28 +42,33 @@ export default function NewRecordConfirmPage() {
 
     // Submit the new record to db
     const onSubmit = handleSubmit(async (data) => {
-        try {
-            const response = await fetch("./api/new-record", {
-                method: "POST",
-                body: JSON.stringify(data),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+        if (values.isConfirmed) {
+            try {
+                const response = await fetch("./api/new-record", {
+                    method: "POST",
+                    body: JSON.stringify(data),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
 
-            if (!response.ok) {
-                const result = await response.json();
-                console.log({ mesage: result.message });
-                setError("root", { type: "custom", message: result.message });
-            }
+                if (!response.ok) {
+                    const result = await response.json();
+                    console.log({ mesage: result.message });
+                    setError("root", { type: "custom", message: result.message });
+                    setErrorMessagePopUp(true)
+                } else {
+                    router.push(paths.home());
+                }
 
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError("root", { type: "custom", message: err.message });
-                setErrorMessagePopUp(true);
-            } else {
-                setError("root", { type: "custome", message: "Something wrong" })
-                setErrorMessagePopUp(true);
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    setError("root", { type: "custom", message: err.message });
+                    setErrorMessagePopUp(true);
+                } else {
+                    setError("root", { type: "custome", message: "Something wrong" })
+                    setErrorMessagePopUp(true);
+                }
             }
         }
     })
@@ -353,16 +358,16 @@ export default function NewRecordConfirmPage() {
                             </button>
                         </div>
                         <div className={`${values.object && "relative border-2 border-gray-500/30 border-solid"} w-full h-full bg-gray-500 flex items-center justify-center rounded-md gap-2`}>
-                            {values.object ? 
+                            {values.object ?
                                 <div className="absolute inset-0">
-                                    <Image 
+                                    <Image
                                         src={values.object}
                                         alt="Record Image"
                                         fill
                                         className="object-cover rounded-md"
                                     />
                                 </div>
-                            :
+                                :
                                 <>
                                     <CiImageOff size={48} className="fill-white" />
                                     <span className="font-[700] text-white text-xl">No Content</span>
@@ -510,6 +515,7 @@ export default function NewRecordConfirmPage() {
                                     onClick={() => {
                                         setValue("isSubmitted", true);
                                         setIsSaved(false);
+                                        setValue("isConfirmed", true);
                                     }}
                                 >
                                     Submit
@@ -521,6 +527,7 @@ export default function NewRecordConfirmPage() {
                                     onClick={() => {
                                         setValue("isSubmitted", false);
                                         setIsSaved(true);
+                                        setValue("isConfirmed", true);
                                     }}
                                 >
                                     Save
@@ -561,7 +568,9 @@ export default function NewRecordConfirmPage() {
                                 <button
                                     type="button"
                                     className="w-full px-2 py-1 bg-gray-500 text-center hover:bg-gray-500/50 text-white font-[700] rounded-lg cursor-pointer"
-                                    onClick={() => setIsLeaving(false)}
+                                    onClick={() => {setIsLeaving(false)
+                                        setValue("isConfirmed", false);
+                                    }}
                                 >
                                     No, back to the page
                                 </button>
