@@ -13,6 +13,7 @@ import { styled } from '@mui/material/styles';
 import isSameOrAfterPlugin from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBeforePlugin from "dayjs/plugin/isSameOrBefore";
 import paths from "@/paths";
+import { Bar, BarChart } from "recharts";
 
 dayjs.extend(isSameOrAfterPlugin);  // Extend dayjs with the plugin
 dayjs.extend(isSameOrBeforePlugin);
@@ -193,7 +194,18 @@ export default function DashboardGraph() {
 
             {/* Graph & categories */}
             <div className="grid grid-cols-[1fr_240px] ">
+                {/* Graph for income & expenses (Bar, line, and ) */}
+                <div className="w-full bg-white rounded-xl shadow-xl px-2 py-1">
+                    <BarChart className="w-full">
+                        <Bar dataKey={"This week"} fill="#000000"/>
+                        <Bar dataKey={"Last Week"} fill="004000"/>
+                    </BarChart>
+                </div>
 
+                {/* Category */}
+                <div className="w-full bg-white rounded-xl shadow-xl px-2 py-1">
+
+                </div>
             </div>
         </div>
     )

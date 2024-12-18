@@ -21,7 +21,7 @@ export default function ResetPasswordState({formState}: ResetPasswordStateProps)
                     type='email'
                     placeholder='email@example.com'
                     disabled={pending}
-                    className={`w-full border-2 border-gray-400/50 border-solid rounded-lg px-3 py-2 text-base`}
+                    className={`w-full border-2 border-gray-400/50 border-solid rounded-lg px-3 py-2 text-base outline-none`}
                 />
                 {formState.errors.email &&
                     <p className="text-base text-red-500">{formState.errors.email}</p>

@@ -63,14 +63,6 @@ export async function login(formState: LoginState, formData: FormData): Promise<
         await sendVerificationEmail(verificationToken.email, verificationToken.token);
 
         redirect(paths.verificationEmailSentPage());
-
-        return {
-            errors: {},
-            success: {
-                isSuccess: true,
-                message: ["Confirmation is sent!"],
-            }
-        };
     }
 
     try {

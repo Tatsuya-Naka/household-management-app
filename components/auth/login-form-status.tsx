@@ -20,6 +20,7 @@ export default function LogInFormStatus({formState}: LoginFormStatusProps) {
         email: "",
         password: "",
     });
+    // Error handlling
     const searchParams = useSearchParams();
     const urlError = searchParams.get("error") === "OAuthAccountNotLinked" ? "Email already in use with different provider" : "";
 
@@ -78,7 +79,7 @@ export default function LogInFormStatus({formState}: LoginFormStatusProps) {
             <button
                 type="submit"
                 disabled={pending}
-                className='w-full tracking-[1px] border-lg bg-sky-400 hover:bg-sky-200 sm:px-4 sm:py-3 px-2 py-1.5 rounded-md sm:text-lg text-base text-white font-[500]'
+                className={`w-full tracking-[1px] border-lg ${pending ? "bg-sky-200" : "bg-sky-400 hover:bg-sky-200"} sm:px-4 sm:py-3 px-2 py-1.5 rounded-md sm:text-lg text-base text-white font-[500]`}
             >
                 {pending && <RotateRightSharpIcon className="animate-spin mr-2" />}
                 Login with Email

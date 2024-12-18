@@ -23,7 +23,7 @@ export default async function LoginPage() {
 
                 <Image
                     src={Shinchan}
-                    alt='Hima'
+                    alt='Shinchan'
                     height={2000}
                     width={2000}
                     className='lg:w-[380px] sm:w-[250px] sm:inline-block hidden shrink-0'
