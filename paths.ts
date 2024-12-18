@@ -59,6 +59,9 @@ const paths = {
     newRecordConfirmUrl() {
         return "/register/confirm";
     },
+    newRecordCancelUrl() {
+        return "/server/new-record/cancel";
+    },
 }
 
 export default paths;

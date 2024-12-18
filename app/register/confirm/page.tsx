@@ -9,7 +9,6 @@ import paths from "@/paths";
 import { useFormContext } from "react-hook-form";
 import { useState } from "react";
 import { NewRecordType } from "../layout";
-import Link from "next/link";
 import Image from "next/image";
 
 export type Items = {
@@ -39,6 +38,7 @@ export default function NewRecordConfirmPage() {
     const [isLeaving, setIsLeaving] = useState(false);
     const [isSaved, setIsSaved] = useState(true);
     const [errorMessagePopUp, setErrorMessagePopUp] = useState(errors.root ? true : false);
+    const [leavePending, setLeavePending] = useState(false);
 
     // Submit the new record to db
     const onSubmit = handleSubmit(async (data) => {
@@ -69,7 +69,40 @@ export default function NewRecordConfirmPage() {
                 }
             }
         }
-    })
+    });
+
+    const handleDeleteForm = async () => {
+        if (values.object) {
+            try {
+                setLeavePending(true);
+                console.log("Deleting...");
+                const response = await fetch(paths.newRecordCancelUrl(), {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(values),
+                });
+                if (!response.ok) {
+                    const result = await response.json();
+                    setError("root", {type: "custome", "message": result.message});
+                    setLeavePending(false);
+                }
+                if (response.ok) {
+                    router.push(paths.home());
+                }
+
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    setError("root", {type: "custome", "message": err.message});
+                } else {
+                    setError("root", {type: "custome", "message": "Something Wrong"});
+                }
+            }
+        } else {
+            router.push(paths.home());
+        }
+    };
 
     return (
         <div className="max-w-full bg-orange-200/50 min-h-screen">
@@ -545,8 +578,9 @@ export default function NewRecordConfirmPage() {
                                 <h2 className="text-xl font-[700] text-slate-800">Delete your new record</h2>
                                 <button
                                     type="button"
-                                    className="p-1 hover:bg-gray-500/30 rounded-md"
+                                    className={`p-1 ${leavePending ? "cursor-not-allowed" : "hover:bg-gray-500/30 cursor-pointer"} rounded-md`}
                                     onClick={() => setIsLeaving(false)}
+                                    disabled={leavePending}
                                 >
                                     <RiCloseLine size={32} />
                                 </button>
@@ -557,19 +591,22 @@ export default function NewRecordConfirmPage() {
                                 <p>Do you want to allow deleting this new record?</p>
                             </div>
                             <div className="flex items-center justify-evenly text-lg w-full gap-2">
-                                <Link
-                                    href={paths.home()}
-                                    className="w-full px-2 py-1 bg-red-500 text-center hover:bg-red-500/50 text-white font-[700] cursor-pointer rounded-lg"
-                                >
-                                    Yes, leave now
-                                </Link>
                                 <button
                                     type="button"
-                                    className="w-full px-2 py-1 bg-gray-500 text-center hover:bg-gray-500/50 text-white font-[700] rounded-lg cursor-pointer"
+                                    className={`w-full px-2 py-1 text-center ${leavePending ? "bg-red-500/50 cursor-wait" : "bg-red-500 hover:bg-red-500/50 cursor-pointer"} text-white font-[700] cursor-pointer rounded-lg`}
+                                    onClick={handleDeleteForm}
+                                    disabled={leavePending}
+                                >
+                                    Yes, leave now
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`w-full px-2 py-1 text-center ${leavePending ? "bg-gray-500/50 cursor-not-allowed" : "bg-gray-500 hover:bg-gray-500/50 cursor-pointer"} text-white font-[700] rounded-lg cursor-pointer`}
                                     onClick={() => {
                                         setIsLeaving(false)
                                         setValue("isConfirmed", false);
                                     }}
+                                    disabled={leavePending}
                                 >
                                     No, back to the page
                                 </button>
