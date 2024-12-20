@@ -62,6 +62,9 @@ const paths = {
     newRecordCancelUrl() {
         return "/server/new-record/cancel";
     },
+    dashboardFetchUrl() {
+        return "server/dashboard/fetch/type";
+    },
 }
 
 export default paths;

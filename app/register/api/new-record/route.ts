@@ -5,10 +5,13 @@ import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import dayjs from "dayjs";
 import { sqsSendReceiveMessage } from "@/data/sendReceiveMessage";
+import { generateDateFormat } from "@/data/date";
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
+        const dateOriginal = new Date(body.date);
+        const milliseconds = dateOriginal.getTime();
         const date = dayjs(body.date).format("YYYY-MM-DD");
         if (!date) {
             return NextResponse.json({message: "You must select the date"}, {status: 400});
@@ -111,7 +114,9 @@ export async function POST(req: NextRequest) {
                 typeId: type.id,
                 currencyId: currency.id,
                 countryId: country.id,
-                date,
+                date: milliseconds,
+                dateString: date,
+                dateCalendar: generateDateFormat(dateOriginal),
                 xrateId,
             }
         });
@@ -213,6 +218,7 @@ export async function POST(req: NextRequest) {
                     income_amount: body.income_amount,
                     comment: body.comment,
                     object: imageUrl,
+                    isSubmitted: body.isSubmitted,
                 }
             });
         } else if (body.type === "expenses") {

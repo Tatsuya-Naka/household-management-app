@@ -1,7 +1,7 @@
 "use client";
 
 import { generateDateFormat } from "@/data/date";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider/LocalizationProvider";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -13,7 +13,20 @@ import { styled } from '@mui/material/styles';
 import isSameOrAfterPlugin from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBeforePlugin from "dayjs/plugin/isSameOrBefore";
 import paths from "@/paths";
-import { Bar, BarChart } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Tooltip } from "@mui/material";
+
+// TODO: receive data from the client based on the date
+// TODO: Eliminate data based on the type (income or expenses)
+// TODO: Graph (Bar and Line and additional figures for income & expenses) & Category for Income & expenses
+// TODO: Figures on the graph
+
+type Data = {
+    type: {name: string}, currency: {name: string}, Items: {
+        category: {name: string}, subcategory: {name: string} | null,
+    }[], income_amount: number | null, totalcost: number | null, payment_method: string | null, xrateId: string | null,
+    incomeresource: {name: string} | null, incomecategory: {name: string} | null, dateCalendar: string,
+};
 
 dayjs.extend(isSameOrAfterPlugin);  // Extend dayjs with the plugin
 dayjs.extend(isSameOrBeforePlugin);
@@ -75,6 +88,7 @@ export default function DashboardGraph() {
     const [to, setTo] = useState(toDate ? dayjs(toDate).toDate() : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
     const [isFrom, setIsFrom] = useState(false);
     const [isTo, setIsTo] = useState(false);
+    const [isFetched, setIsFetched] = useState(false);
 
     const [calendar, setCalendar] = useState(false);
 
@@ -99,6 +113,64 @@ export default function DashboardGraph() {
     const handleSubmit = () => {
         redirect(`${paths.home()}?from=${dayjs(from)}&to=${dayjs(to)}`)
     }
+
+    const [currentIncome, setCurrentIncome] = useState<Data[]>();
+    const [prevIncome, setPrevIncome] = useState<Data[]>();
+    const [currentExpense, setCurrentExpense] = useState<Data[]>();
+    const [prevExpense, setPrevExpense] = useState<Data[]>();
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!isFetched) {
+                const duration = (new Date(to)).setHours(0, 0, 0, 0) - (new Date(from)).setHours(0, 0, 0, 0);
+                const fromPrev = from.getTime() - duration - 86400000;
+                const toPrev = to.getTime() - duration - 1;
+                // console.log({fromOrigin: from});
+                console.log({milliseconds: (new Date(from)).setHours(0, 0, 0, 0)});
+                console.log({from: new Date((new Date(from)).setHours(0, 0, 0, 0))});
+
+                const response = await fetch(paths.dashboardFetchUrl(), {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        // get the end of the date & adjust times to 00:00:00
+                        from: (new Date(from)).setHours(0, 0, 0, 0),
+                        to: (new Date(to)).setHours(0, 0, 0, 0) + 86400000 - 1,
+                        fromPrev: (new Date(from)).setHours(0, 0, 0, 0) - duration - 86400000,
+                        toPrev: (new Date(to)).setHours(0, 0, 0, 0) - duration - 1,
+                    })
+                });
+                const result = await response.json();
+                
+                // TODO: sort by date and add the date with 0 totalcost/income_amount
+                // TODO: combine prev and current data for the rechart.
+                setCurrentIncome(result.current.filter((data: Data) => data.type.name === "income"));
+                setPrevIncome(result.prev.filter((data: Data) => data.type.name === "income"));
+                setCurrentExpense(result.current.filter((data: Data) => data.type.name === "expenses"));
+                setPrevExpense(result.prev.filter((data: Data) => data.type.name === "expenses"));
+
+                setIsFetched(true);
+            }
+        }
+        fetchData()
+            .catch((err: unknown) => {
+                if (err instanceof Error) {
+                    console.log(err.message);
+                } else {
+                    console.log("Internal Server Error");
+                }
+            })
+        
+    }, [isFetched, from, to]);
+
+    useEffect(() => {
+        console.log({CurrentIncome: currentIncome});
+        console.log({PrevIncome: prevIncome});
+        console.log({currentExpense: currentExpense});
+        console.log({prevExpense: prevExpense});
+    }, [currentIncome, prevIncome, currentExpense, prevExpense]);
 
     return (
         <div className="grid grid-rows-[80px_auto] -mr-[81px]">
@@ -196,9 +268,13 @@ export default function DashboardGraph() {
             <div className="grid grid-cols-[1fr_240px] ">
                 {/* Graph for income & expenses (Bar, line, and ) */}
                 <div className="w-full bg-white rounded-xl shadow-xl px-2 py-1">
-                    <BarChart className="w-full">
-                        <Bar dataKey={"This week"} fill="#000000"/>
-                        <Bar dataKey={"Last Week"} fill="004000"/>
+                    <BarChart width={480} height={250} className="w-full" data={currentExpense}>
+                        <CartesianGrid strokeDasharray= "3 3" />
+                        <XAxis dataKey={"dateCalendar"} />
+                        <YAxis />
+                        
+                        <Bar dataKey={"totalcost"} fill="#8884d8" />
+                        {/* <Bar dataKey={"Last Week"} fill="004000" /> */}
                     </BarChart>
                 </div>
 
