@@ -13,8 +13,7 @@ import { styled } from '@mui/material/styles';
 import isSameOrAfterPlugin from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBeforePlugin from "dayjs/plugin/isSameOrBefore";
 import paths from "@/paths";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { Tooltip } from "@mui/material";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 
 // TODO: receive data from the client based on the date
 // TODO: Eliminate data based on the type (income or expenses)
@@ -22,11 +21,28 @@ import { Tooltip } from "@mui/material";
 // TODO: Figures on the graph
 
 type Data = {
-    type: {name: string}, currency: {name: string}, Items: {
-        category: {name: string}, subcategory: {name: string} | null,
+    type: { name: string }, currency: { name: string }, Items: {
+        category: { name: string }, subcategory: { name: string } | null,
     }[], income_amount: number | null, totalcost: number | null, payment_method: string | null, xrateId: string | null,
-    incomeresource: {name: string} | null, incomecategory: {name: string} | null, dateCalendar: string,
+    incomeresource: { name: string } | null, incomecategory: { name: string } | null, dateString: string, dateCalendar: string,
 };
+
+type forGraph = {
+    dateCalendar: string;
+    amount: number;
+    dayOfWeek: string;
+    label: string;
+};
+
+// type forCompGraph = {
+//     dayOfWeek: string;
+//     curr: number;
+//     last: number;
+// };
+
+type CustomTooltipProps = {
+    payload?: { payload: forGraph }[]; // `payload` from Recharts passed in
+  };
 
 dayjs.extend(isSameOrAfterPlugin);  // Extend dayjs with the plugin
 dayjs.extend(isSameOrBeforePlugin);
@@ -116,18 +132,20 @@ export default function DashboardGraph() {
 
     const [currentIncome, setCurrentIncome] = useState<Data[]>();
     const [prevIncome, setPrevIncome] = useState<Data[]>();
-    const [currentExpense, setCurrentExpense] = useState<Data[]>();
-    const [prevExpense, setPrevExpense] = useState<Data[]>();
+    const [expense, setExpense] = useState<forGraph[]>();
+    // const [compExpense, setCompExpense] = useState<forCompGraph[]>();
 
     useEffect(() => {
         const fetchData = async () => {
             if (!isFetched) {
                 const duration = (new Date(to)).setHours(0, 0, 0, 0) - (new Date(from)).setHours(0, 0, 0, 0);
-                const fromPrev = from.getTime() - duration - 86400000;
-                const toPrev = to.getTime() - duration - 1;
+                const start = (new Date(from)).setHours(0, 0, 0, 0);
+                const end = (new Date(to)).setHours(0, 0, 0, 0) + 86400000 - 1;
+                const startPrev = (new Date(from)).setHours(0, 0, 0, 0) - duration - 86400000;
+                const endPrev = (new Date(to)).setHours(0, 0, 0, 0) - duration - 1;
                 // console.log({fromOrigin: from});
-                console.log({milliseconds: (new Date(from)).setHours(0, 0, 0, 0)});
-                console.log({from: new Date((new Date(from)).setHours(0, 0, 0, 0))});
+                console.log({ milliseconds: (new Date(from)).setHours(0, 0, 0, 0) });
+                console.log({ from: new Date((new Date(from)).setHours(0, 0, 0, 0)) });
 
                 const response = await fetch(paths.dashboardFetchUrl(), {
                     method: "POST",
@@ -136,20 +154,77 @@ export default function DashboardGraph() {
                     },
                     body: JSON.stringify({
                         // get the end of the date & adjust times to 00:00:00
-                        from: (new Date(from)).setHours(0, 0, 0, 0),
-                        to: (new Date(to)).setHours(0, 0, 0, 0) + 86400000 - 1,
-                        fromPrev: (new Date(from)).setHours(0, 0, 0, 0) - duration - 86400000,
-                        toPrev: (new Date(to)).setHours(0, 0, 0, 0) - duration - 1,
+                        from: start,
+                        to: end,
+                        fromPrev: startPrev,
+                        toPrev: endPrev,
                     })
                 });
                 const result = await response.json();
-                
+
                 // TODO: sort by date and add the date with 0 totalcost/income_amount
                 // TODO: combine prev and current data for the rechart.
-                setCurrentIncome(result.current.filter((data: Data) => data.type.name === "income"));
+                setCurrentIncome(result.current
+                    .filter((data: Data) => data.type.name === "income")
+                );
                 setPrevIncome(result.prev.filter((data: Data) => data.type.name === "income"));
-                setCurrentExpense(result.current.filter((data: Data) => data.type.name === "expenses"));
-                setPrevExpense(result.prev.filter((data: Data) => data.type.name === "expenses"));
+
+                // Current Expense Data
+                const currentExpense = result.current
+                    .filter((data: Data) => data.type.name === "expenses")
+                    .sort((a: Data, b: Data) => {
+                        const date1 = new Date(a.dateString).getTime();
+                        const date2 = new Date(b.dateString).getTime();
+                        return date1 - date2;
+                    });
+                console.log({ current: currentExpense });
+                const scheduleCurrent: { [dateCalendar: string]: { totalCost: number, dayOfWeek: string } } = {};
+
+                for (let i = start; i <= end; i += 86400000) {
+                    scheduleCurrent[generateDateFormat(new Date(i))] = { totalCost: 0, dayOfWeek: dayjs(i).format("ddd") };
+                }
+
+                console.log({ schedule: scheduleCurrent });
+
+                for (let i = 0; i < currentExpense.length; i++) {
+                    const data = currentExpense[i];
+                    scheduleCurrent[data.dateCalendar].totalCost += data.totalcost;
+                    scheduleCurrent[data.dateCalendar].totalCost = (scheduleCurrent[data.dateCalendar].totalCost * 100) / 100;
+                }
+
+                const currExpenseArray = Object.entries(scheduleCurrent).map(([dateCalendar, value]) => ({
+                    dateCalendar,
+                    amount: value.totalCost,
+                    dayOfWeek: value.dayOfWeek,
+                    label: `${dateCalendar} (${value.dayOfWeek})`
+                }));
+
+                console.log({ curr: currExpenseArray });
+                setExpense(currExpenseArray);
+
+                // Prev Expense data
+                const prevExpense = result.prev
+                    .filter((data: Data) => data.type.name === "expenses")
+                    .sort((a: Data, b: Data) => new Date(a.dateString).getTime() - new Date(b.dateString).getTime());
+                const schedulePrev: { [dateCalendar: string]: { totalCost: number, dayOfWeek: string } } = {};
+                for (let i = startPrev; i <= endPrev; i += 86400000) {
+                    schedulePrev[generateDateFormat(new Date(i))] = {totalCost: 0, dayOfWeek: dayjs(i).format('ddd')};
+                }
+                for (let i = 0; i < prevExpense.length; i++) {
+                    const data = prevExpense[i];
+                    schedulePrev[data.dateCalendar].totalCost += data.totalcost;
+                    schedulePrev[data.dateCalendar].totalCost = (schedulePrev[data.dateCalendar].totalCost * 100) / 100;
+                }
+
+                const prevExpenseArray = Object.entries(schedulePrev).map(([dateCalendar, value]) => ({
+                    dateCalendar,
+                    amount: value.totalCost,
+                    dayOfWeek: value.dayOfWeek,
+                }));
+
+                console.log({prev: prevExpenseArray});
+
+                // setPrevExpense();
 
                 setIsFetched(true);
             }
@@ -162,15 +237,28 @@ export default function DashboardGraph() {
                     console.log("Internal Server Error");
                 }
             })
-        
     }, [isFetched, from, to]);
 
     useEffect(() => {
-        console.log({CurrentIncome: currentIncome});
-        console.log({PrevIncome: prevIncome});
-        console.log({currentExpense: currentExpense});
-        console.log({prevExpense: prevExpense});
-    }, [currentIncome, prevIncome, currentExpense, prevExpense]);
+        console.log({ CurrentIncome: currentIncome });
+        console.log({ PrevIncome: prevIncome });
+        console.log({ expense: expense });
+    }, [currentIncome, prevIncome, expense]);
+
+    // CustomToolTip
+    const CustomeToolTip = (({payload}: CustomTooltipProps) => {
+        if (payload && payload.length > 0) {
+            const {label, amount} = payload[0].payload;
+
+            return (
+                <div className="bg-white border-2 border-slate-800 border-solid rounded-md px-3 py-2 flex flex-col items-start">
+                    <h3 className="text-base font-[700] text-slate-800">{label}</h3>
+                    <p className="text-base font-[700] text-[#ffaf33]">amount: {amount}</p>
+                </div>
+            )
+        }
+        return null;
+    });
 
     return (
         <div className="grid grid-rows-[80px_auto] -mr-[81px]">
@@ -265,16 +353,18 @@ export default function DashboardGraph() {
             </div>
 
             {/* Graph & categories */}
-            <div className="grid grid-cols-[1fr_240px] ">
+            <div className="grid grid-cols-[1fr_480px] ">
                 {/* Graph for income & expenses (Bar, line, and ) */}
                 <div className="w-full bg-white rounded-xl shadow-xl px-2 py-1">
-                    <BarChart width={480} height={250} className="w-full" data={currentExpense}>
-                        <CartesianGrid strokeDasharray= "3 3" />
+                    <BarChart width={850} height={400} className="w-full" data={expense}>
+                        <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey={"dateCalendar"} />
-                        <YAxis />
-                        
-                        <Bar dataKey={"totalcost"} fill="#8884d8" />
-                        {/* <Bar dataKey={"Last Week"} fill="004000" /> */}
+                        <YAxis label={{ value: "AUD[$]", angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
+                        <Tooltip content={<CustomeToolTip />} />
+                        {/* <Tooltip /> */}
+                        {/* <Legend /> */}
+                        {/* <Bar dataKey={"totalCost"} fill="#f0dec4" /> */}
+                        <Bar dataKey={"amount"} fill="#ffaf33" />
                     </BarChart>
                 </div>
 

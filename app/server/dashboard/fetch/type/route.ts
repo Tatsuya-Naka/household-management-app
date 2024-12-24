@@ -1,7 +1,5 @@
 "use server";
 import { NextRequest, NextResponse } from "next/server";
-import dayjs from "dayjs"
-import { generateDateFormat } from "@/data/date";
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
 
@@ -14,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { from, to, fromPrev, toPrev }: {from: number, to: number, fromPrev: number, toPrev: number} = body;        
+        const { from, to, fromPrev, toPrev }: {from: bigint, to: bigint, fromPrev: bigint, toPrev: bigint} = body;        
         // console.log({from: new Date(from)});
         // console.log({to: new Date(to)});
         // console.log({fromPrev: new Date(fromPrev)});
@@ -51,7 +49,9 @@ export async function POST(req: NextRequest) {
                 totalcost: true,
                 payment_method: true,
                 xrateId: true,
+                dateString: true,
                 dateCalendar: true,
+                // date: true,
             },
             where: {
                 userId: session.user.id,
@@ -93,7 +93,9 @@ export async function POST(req: NextRequest) {
                 totalcost: true,
                 payment_method: true,
                 xrateId: true,
+                dateString: true,
                 dateCalendar: true,
+                // date: true,
             },
             where: {
                 userId: session.user.id,
@@ -104,6 +106,9 @@ export async function POST(req: NextRequest) {
                 },
             }
         });
+
+        console.log({current: data});
+        console.log({prev: dataPrev});
 
         return NextResponse.json({message: "Success", current: data, prev: dataPrev}, {status: 200});
 
