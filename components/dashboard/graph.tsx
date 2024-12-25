@@ -13,7 +13,8 @@ import { styled } from '@mui/material/styles';
 import isSameOrAfterPlugin from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBeforePlugin from "dayjs/plugin/isSameOrBefore";
 import paths from "@/paths";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, LineChart, Line, ComposedChart, PieChart, Pie } from "recharts";
+import { IoMdArrowDropup } from "react-icons/io";
 
 // TODO: receive data from the client based on the date
 // TODO: Eliminate data based on the type (income or expenses)
@@ -34,15 +35,20 @@ type forGraph = {
     label: string;
 };
 
-// type forCompGraph = {
-//     dayOfWeek: string;
-//     curr: number;
-//     last: number;
-// };
+type forCompGraph = {
+    currString: string;
+    currNum: number;
+    prevString: string;
+    prevNum: number;
+    label: string;
+};
 
 type CustomTooltipProps = {
     payload?: { payload: forGraph }[]; // `payload` from Recharts passed in
-  };
+};
+type CustomeTooltipCompProps = {
+    payload?: { payload: forCompGraph }[];
+};
 
 dayjs.extend(isSameOrAfterPlugin);  // Extend dayjs with the plugin
 dayjs.extend(isSameOrBeforePlugin);
@@ -100,13 +106,16 @@ export default function DashboardGraph() {
     const params = useSearchParams();
     const fromDate = params.get("from");
     const toDate = params.get("to");
-    const [from, setFrom] = useState(fromDate ? dayjs(fromDate).toDate() : new Date());
-    const [to, setTo] = useState(toDate ? dayjs(toDate).toDate() : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+    const [from, setFrom] = useState(fromDate ? dayjs(fromDate).toDate() : new Date(Date.now() - 6 * 24 * 60 * 60 * 1000));
+    const [to, setTo] = useState(toDate ? dayjs(toDate).toDate() : new Date(Date.now()));
     const [isFrom, setIsFrom] = useState(false);
     const [isTo, setIsTo] = useState(false);
     const [isFetched, setIsFetched] = useState(false);
 
     const [calendar, setCalendar] = useState(false);
+    const [graphChange, setGraphChange] = useState("default");
+    const [openGChange, setOpenGChange] = useState(false);
+    const [chartType, setChartType] = useState("bar");
 
     const handleDateChange = (newValue: Dayjs | null) => {
         if ((!isFrom || (isFrom && isTo)) && newValue) {
@@ -133,7 +142,7 @@ export default function DashboardGraph() {
     const [currentIncome, setCurrentIncome] = useState<Data[]>();
     const [prevIncome, setPrevIncome] = useState<Data[]>();
     const [expense, setExpense] = useState<forGraph[]>();
-    // const [compExpense, setCompExpense] = useState<forCompGraph[]>();
+    const [compExpense, setCompExpense] = useState<forCompGraph[]>();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -208,7 +217,7 @@ export default function DashboardGraph() {
                     .sort((a: Data, b: Data) => new Date(a.dateString).getTime() - new Date(b.dateString).getTime());
                 const schedulePrev: { [dateCalendar: string]: { totalCost: number, dayOfWeek: string } } = {};
                 for (let i = startPrev; i <= endPrev; i += 86400000) {
-                    schedulePrev[generateDateFormat(new Date(i))] = {totalCost: 0, dayOfWeek: dayjs(i).format('ddd')};
+                    schedulePrev[generateDateFormat(new Date(i))] = { totalCost: 0, dayOfWeek: dayjs(i).format('ddd') };
                 }
                 for (let i = 0; i < prevExpense.length; i++) {
                     const data = prevExpense[i];
@@ -222,7 +231,22 @@ export default function DashboardGraph() {
                     dayOfWeek: value.dayOfWeek,
                 }));
 
-                console.log({prev: prevExpenseArray});
+                // console.log({prev: prevExpenseArray});
+
+                const compExpenseArray: forCompGraph[] = [];
+                for (let i = 0; i < currExpenseArray.length && i < prevExpenseArray.length; i++) {
+                    const currData = currExpenseArray[i];
+                    const prevData = prevExpenseArray[i];
+                    compExpenseArray.push({
+                        currString: currData.dateCalendar,
+                        currNum: currData.amount,
+                        prevString: prevData.dateCalendar,
+                        prevNum: prevData.amount,
+                        label: `${prevData.dateCalendar} | ${currData.dateCalendar}`
+                    });
+                };
+
+                setCompExpense(compExpenseArray);
 
                 // setPrevExpense();
 
@@ -243,12 +267,13 @@ export default function DashboardGraph() {
         console.log({ CurrentIncome: currentIncome });
         console.log({ PrevIncome: prevIncome });
         console.log({ expense: expense });
-    }, [currentIncome, prevIncome, expense]);
+        console.log({ compExpense: compExpense });
+    }, [currentIncome, prevIncome, expense, compExpense]);
 
     // CustomToolTip
-    const CustomeToolTip = (({payload}: CustomTooltipProps) => {
+    const CustomeToolTip = (({ payload }: CustomTooltipProps) => {
         if (payload && payload.length > 0) {
-            const {label, amount} = payload[0].payload;
+            const { label, amount } = payload[0].payload;
 
             return (
                 <div className="bg-white border-2 border-slate-800 border-solid rounded-md px-3 py-2 flex flex-col items-start">
@@ -260,34 +285,75 @@ export default function DashboardGraph() {
         return null;
     });
 
+    const CustomToolTipComp = (({ payload }: CustomeTooltipCompProps) => {
+        if (payload && payload.length > 0) {
+            const { currString, currNum, prevString, prevNum } = payload[0].payload;
+
+            return (
+                <div className="bg-white border-2 border-slate-800 border-solid rounded-md px-3 py-2 flex flex-col items-start">
+                    <h3 className="text-base font-[700] text-slate-800">Amount</h3>
+                    <p className="text-base font-[700] text-[#ffaf33]">{currString}: {currNum}</p>
+                    <p className="text-base font-[700] text-[#c6ae8b]">{prevString}: {prevNum}</p>
+                </div>
+            )
+        }
+    });
+
     return (
         <div className="grid grid-rows-[80px_auto] -mr-[81px]">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                    <button
-                        type="button"
-                        className="underline underline-offset-4 text-xl font-[700] text-slate-800 mr-10"
-                    >
-                        Bar
-                    </button>
+            <div className="grid grid-cols-[1fr_480px] gap-2">
+                <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center">
+                        <button
+                            type="button"
+                            className={`${chartType === "bar" ? "underline underline-offset-4 font-[700]" : "font-[500] hover:underline hover:underline-offset-4 "} text-xl text-slate-800 mr-10`}
+                            onClick={() => setChartType("bar")}
+                        >
+                            Bar
+                        </button>
 
-                    <button
-                        type="button"
-                        className="font-[500] text-slate-800 text-xl hover:underline hover:underline-offset-4 mr-10"
-                    >
-                        Line
-                    </button>
+                        <button
+                            type="button"
+                            className={`${chartType === "line" ? "underline underline-offset-4 font-[700]" : "font-[500] hover:underline hover:underline-offset-4 "} text-xl text-slate-800 mr-10`}
+                            onClick={() => setChartType("line")}
+                        >
+                            Line
+                        </button>
 
-                    <button
-                        type="button"
-                        className="font-[500] text-slate-800 text-xl hover:underline hover:underline-offset-4"
-                    >
-                        Band
-                    </button>
+                        <button
+                            type="button"
+                            className={`${chartType === "mix" ? "underline underline-offset-4 font-[700]" : "font-[500] hover:underline hover:underline-offset-4 "} text-xl text-slate-800 mr-10`}
+                            onClick={() => setChartType("mix")}
+                        >
+                            Mix
+                        </button>
+                    </div>
+                    <div className="relative z-10">
+                        <button className="cursor-pointer px-2 py-2 rounded-md bg-slate-800/50 text-white text-[700] text-xl flex items-center justify-between gap-1"
+                            onClick={() => setOpenGChange(prev => !prev)}
+                        >
+                            <span className="capitalize w-28 text-left">{graphChange}</span>
+                            <IoMdArrowDropup size={24} className={`${openGChange ? "rotate-180" : "rotate-0"} transition duration-300 ease-in`} />
+                        </button>
+                        {openGChange &&
+                            <div className="absolute z-10 w-full">
+                                <div className="rounded-md border-2 border-slate-800/30 bg-white">
+                                    <button className="text-base text-[500] text-slate-800 capitalize w-full text-left px-2 py-1"
+                                        onClick={() => {
+                                            setGraphChange(prev => prev === "default" ? "comparison" : "default");
+                                            setOpenGChange(false);
+                                        }}
+                                    >
+                                        {graphChange === "default" ? "comparison" : "default"}
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
                 </div>
 
                 {/* Calendar */}
-                <div className="relative z-10">
+                <div className="relative z-10 shrink-0 flex items-center justify-end">
                     <div className="rounded-md bg-gray-400/50 px-3 py-1 text-slate-800 cursor-pointer" onClick={() => setCalendar(true)}>
                         <div className="flex items-center">
                             <label className="flex flex-col items-start mr-5 cursor-pointer">
@@ -353,26 +419,90 @@ export default function DashboardGraph() {
             </div>
 
             {/* Graph & categories */}
-            <div className="grid grid-cols-[1fr_480px] ">
+            <div className="grid grid-cols-[1fr_480px] gap-2">
                 {/* Graph for income & expenses (Bar, line, and ) */}
                 <div className="w-full bg-white rounded-xl shadow-xl px-2 py-1">
-                    <BarChart width={850} height={400} className="w-full" data={expense}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey={"dateCalendar"} />
-                        <YAxis label={{ value: "AUD[$]", angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
-                        <Tooltip content={<CustomeToolTip />} />
-                        {/* <Tooltip /> */}
-                        {/* <Legend /> */}
-                        {/* <Bar dataKey={"totalCost"} fill="#f0dec4" /> */}
-                        <Bar dataKey={"amount"} fill="#ffaf33" />
-                    </BarChart>
+                    {chartType === "bar" &&
+                        ( graphChange === "default"
+                        ?
+                        < BarChart width={850} height={400} className="w-full" data={expense}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey={"dateCalendar"} />
+                            <YAxis label={{ value: "AUD[$]", angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
+                            <Tooltip content={<CustomeToolTip />} />
+                            {/* <Tooltip /> */}
+                            {/* <Legend /> */}
+                            <Bar dataKey={"amount"} fill="#ffaf33" />
+                        </BarChart>
+                        :
+                        < BarChart width={850} height={400} className="w-full" data={compExpense}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey={"label"} />
+                            <YAxis label={{ value: "AUD[$]", angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
+                            <Tooltip content={<CustomToolTipComp />} />
+                            <Bar dataKey={"prevNum"} fill="#c6ae8b" />
+                            <Bar dataKey={"currNum"} fill="#ffaf33" />
+                        </BarChart>
+                        )
+                    }
+                    {chartType === "line" &&
+                        ( graphChange === "default"
+                        ?
+                        < LineChart width={850} height={400} className="w-full" data={expense}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey={"dateCalendar"} />
+                            <YAxis label={{ value: "AUD[$]", angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
+                            <Tooltip content={<CustomeToolTip />} />
+                            {/* <Tooltip /> */}
+                            {/* <Legend /> */}
+                            <Line type="monotone" dataKey={"amount"} stroke="#ffaf33" strokeWidth={3}/>
+                        </LineChart>
+                        :
+                        < LineChart width={850} height={400} className="w-full" data={compExpense}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey={"label"} />
+                            <YAxis label={{ value: "AUD[$]", angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
+                            <Tooltip content={<CustomToolTipComp />} />
+                            <Line type="monotone" dataKey={"prevNum"} stroke="#f0dec4" strokeWidth={3} />
+                            <Line type="monotone" dataKey={"currNum"} stroke="#ffaf33" strokeWidth={3} />
+                        </LineChart>
+                        )
+                    }
+                    {chartType === "mix" &&
+                        ( graphChange === "default"
+                        ?
+                        < ComposedChart width={850} height={400} className="w-full" data={expense}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey={"dateCalendar"} />
+                            <YAxis label={{ value: "AUD[$]", angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
+                            <Tooltip content={<CustomeToolTip />} />
+                            {/* <Tooltip /> */}
+                            {/* <Legend /> */}
+                            <Bar dataKey={"amount"} fill="#ffd27c" />
+                            <Line type="monotone" dataKey={"amount"} stroke="#ffaf33" strokeWidth={3}/>
+                        </ComposedChart>
+                        :
+                        < ComposedChart width={850} height={400} className="w-full" data={compExpense}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey={"label"} />
+                            <YAxis label={{ value: "AUD[$]", angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
+                            <Tooltip content={<CustomToolTipComp />} />
+                            <Bar dataKey={"prevNum"} fill="#c6ae8b" />
+                            <Bar dataKey={"currNum"} fill="#ffaf33" />
+                            <Line type="monotone" dataKey={"prevNum"} stroke="#f0dec4" strokeWidth={3} />
+                            <Line type="monotone" dataKey={"currNum"} stroke="#ffaf33" strokeWidth={3} />
+                        </ComposedChart>
+                        )
+                    }
                 </div>
 
                 {/* Category */}
                 <div className="w-full bg-white rounded-xl shadow-xl px-2 py-1">
-
+                    <PieChart width={480} height={400}>
+                        
+                    </PieChart>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
