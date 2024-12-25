@@ -13,13 +13,11 @@ import { styled } from '@mui/material/styles';
 import isSameOrAfterPlugin from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBeforePlugin from "dayjs/plugin/isSameOrBefore";
 import paths from "@/paths";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, LineChart, Line, ComposedChart, PieChart, Pie } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, LineChart, Line, ComposedChart, PieChart } from "recharts";
 import { IoMdArrowDropup } from "react-icons/io";
 
-// TODO: receive data from the client based on the date
-// TODO: Eliminate data based on the type (income or expenses)
-// TODO: Graph (Bar and Line and additional figures for income & expenses) & Category for Income & expenses
-// TODO: Figures on the graph
+// TODO: Gategory with the funtion (clicking category and can see the detail of it more)
+// TODO: amounts
 
 type Data = {
     type: { name: string }, currency: { name: string }, Items: {
