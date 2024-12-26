@@ -10,6 +10,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({message: "Invalid Access"}, {status: 404});
     }
 
+    console.log({session: session});
+
     try {
         const body = await req.json();
         const { from, to, fromPrev, toPrev }: {from: bigint, to: bigint, fromPrev: bigint, toPrev: bigint} = body;        
@@ -44,6 +46,7 @@ export async function POST(req: NextRequest) {
                         subcategory: {
                             select: {name: true},
                         },
+                        cost: true,
                     }
                 },
                 totalcost: true,
@@ -88,6 +91,7 @@ export async function POST(req: NextRequest) {
                         subcategory: {
                             select: {name: true},
                         },
+                        cost: true,
                     }
                 },
                 totalcost: true,
@@ -110,7 +114,7 @@ export async function POST(req: NextRequest) {
         console.log({current: data});
         console.log({prev: dataPrev});
 
-        return NextResponse.json({message: "Success", current: data, prev: dataPrev}, {status: 200});
+        return NextResponse.json({message: "Success", current: data, prev: dataPrev, session: session}, {status: 200});
 
     } catch (err: unknown) {
         if (err instanceof Error) {
