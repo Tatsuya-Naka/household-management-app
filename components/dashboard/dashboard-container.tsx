@@ -19,7 +19,7 @@ import ShowData from "./show-num";
 import { Session } from "inspector/promises";
 import { User } from "@prisma/client";
 
-// TODO: Cateogry for Income and Mix and Comp each
+// TODO: color for each category
 // TODO: subCategory by cliking button ans can see it
 
 type cateCost = {
@@ -173,7 +173,11 @@ export default function DashboardContainer() {
     const [totalSaving, setTotalSaving] = useState<number>(0);
     const [prevCompSaving, setPrevCompSaving] = useState<number>(0);
     const [categoryExp, setCategoryExp] = useState<cateCost[]>();
-    // const [categoryPrevExp, setCategoryPrevExp] = useState<cateCost[]>();
+    const [categoryPrevExp, setCategoryPrevExp] = useState<cateCost[]>();
+    const [resourceInc, setResourceInc] = useState<cateCost[]>();
+    const [prevResourceInc, setResourcePrevInc] = useState<cateCost[]>();
+    const [displayCategory, setDisplayCategory] = useState<cateCost[]>();
+    const [prevDisplayCategory, setPrevDisplayCategory] = useState<cateCost[]>();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -215,7 +219,7 @@ export default function DashboardContainer() {
                     });
 
                 const scheduleIncomeCurr: { [dateCalendar: string]: { totalIncome: number, dayOfWeek: string } } = {};
-
+                const resourceCurrIncome: { [dateCalendar: string]: number } = {};
                 for (let i = start; i <= end; i += 86400000) {
                     scheduleIncomeCurr[generateDateFormat(new Date(i))] = { totalIncome: 0, dayOfWeek: dayjs(i).format("ddd") };
                 }
@@ -227,8 +231,11 @@ export default function DashboardContainer() {
                     scheduleIncomeCurr[data.dateCalendar].totalIncome = (scheduleIncomeCurr[data.dateCalendar].totalIncome * 100) / 100;
                     calcIncome += data.income_amount;
                     calcIncome = Math.round(calcIncome * 100) / 100;
+                    if (!(data.incomeresource.name in resourceCurrIncome)) {
+                        resourceCurrIncome[data.incomeresource.name] = 0;
+                    }
+                    resourceCurrIncome[data.incomeresource.name] += data.income_amount;
                 }
-
                 const currIncomeArray = Object.entries(scheduleIncomeCurr).map(([dateCalendar, value]) => ({
                     dateCalendar,
                     amount: value.totalIncome,
@@ -236,7 +243,13 @@ export default function DashboardContainer() {
                     label: `${dateCalendar} (${value.dayOfWeek})`
                 }));
 
+                const resourceCurrIncomeArray = Object.entries(resourceCurrIncome).map(([resource, income]) => ({
+                    category: resource,
+                    costRate: Math.round((income / calcIncome) * 10000) / 100,
+                }))
+
                 setIncome(currIncomeArray);
+                setResourceInc(resourceCurrIncomeArray);
 
                 const prevIncome = result.prev
                     .filter((data: Data) => data.type.name === "income")
@@ -252,6 +265,7 @@ export default function DashboardContainer() {
                     scheduleIncomePrev[generateDateFormat(new Date(i))] = { totalIncome: 0, dayOfWeek: dayjs(i).format("ddd") };
                 }
 
+                const resourcePrevIncome: { [dateCalendar: string]: number } = {};
                 let calcIncomePrev = 0;
                 for (let i = 0; i < prevIncome.length; i++) {
                     const data = prevIncome[i];
@@ -259,6 +273,10 @@ export default function DashboardContainer() {
                     scheduleIncomePrev[data.dateCalendar].totalIncome = (scheduleIncomePrev[data.dateCalendar].totalIncome * 100) / 100;
                     calcIncomePrev += data.income_amount;
                     calcIncomePrev = Math.round(calcIncomePrev * 100) / 100;
+                    if (!(data.incomeresource.name in resourcePrevIncome)) {
+                        resourcePrevIncome[data.incomeresource.name] = 0;
+                    }
+                    resourcePrevIncome[data.incomeresource.name] += data.income_amount;
                 }
 
                 const prevIncomeArray = Object.entries(scheduleIncomePrev).map(([dateCalendar, value]) => ({
@@ -267,6 +285,13 @@ export default function DashboardContainer() {
                     dayOfWeek: value.dayOfWeek,
                     label: `${dateCalendar} (${value.dayOfWeek})`
                 }));
+
+                const resourcePreIncArray = Object.entries(resourcePrevIncome).map(([resource, income]) => ({
+                    category: resource,
+                    costRate: Math.round((income / calcIncomePrev) * 1000) / 100,
+                }));
+
+                setResourcePrevInc(resourcePreIncArray);
 
                 const calcRateIncome = Number((((calcIncome - calcIncomePrev) / calcIncomePrev) * 100).toFixed(2));
                 setTotalIncome(calcIncome);
@@ -351,6 +376,7 @@ export default function DashboardContainer() {
                 for (let i = startPrev; i <= endPrev; i += 86400000) {
                     schedulePrev[generateDateFormat(new Date(i))] = { totalCost: 0, dayOfWeek: dayjs(i).format('ddd') };
                 }
+                const categoryPrevExpense: { [dateCalendar: string]: number } = {};
                 let calcPrevExpense = 0;
                 for (let i = 0; i < prevExpense.length; i++) {
                     const data = prevExpense[i];
@@ -358,7 +384,26 @@ export default function DashboardContainer() {
                     schedulePrev[data.dateCalendar].totalCost = (schedulePrev[data.dateCalendar].totalCost * 100) / 100;
                     calcPrevExpense += data.totalcost;
                     calcPrevExpense = Math.round(calcPrevExpense * 100) / 100;
+                    // Category
+                    if (data.Items && data.Items.length > 0) {
+                        for (let j = 0; j < data.Items.length; j++) {
+                            const item = data.Items[j];
+                            const category = item.category.name;
+                            const cost = item.cost;
+                            if (!(category in categoryPrevExpense)) {
+                                categoryPrevExpense[category] = 0;
+                            }
+                            categoryPrevExpense[category] += cost;
+                        }
+                    }
                 }
+
+                const catePrevExpenseArray = Object.entries(categoryPrevExpense).map(([category, cost]) => ({
+                    category,
+                    costRate: Math.round((cost / calcPrevExpense) * 10000) / 100,
+                }));
+
+                setCategoryPrevExp(catePrevExpenseArray);
 
                 const calcRateExpense = Number((((calcExpense - calcPrevExpense) / calcPrevExpense) * 100).toFixed(2));
                 setTotalExpense(calcExpense);
@@ -442,6 +487,9 @@ export default function DashboardContainer() {
 
                 setCompSaving(compSavingArray);
 
+                setDisplayCategory((type === "expenses" ? cateCurrExpenseArray : resourceCurrIncomeArray));
+                setPrevDisplayCategory((type === "expenses" ? catePrevExpenseArray : resourcePreIncArray));
+
                 setIsFetched(true);
             }
         }
@@ -499,7 +547,7 @@ export default function DashboardContainer() {
             return (
                 <div className="bg-white border-2 border-slate-800 border-solid rounded-md px-2 py-1 flex flex-col items-start">
                     <h3 className="text-base font-[700] text-slate-800">{category}</h3>
-                    <p className="text-base font-[700] text-[#ffaf33]">cost: {costRate}%</p>
+                    <p className="text-base font-[700] text-[#ffaf33]">{type === "expenses" ? "cost" : "income  "}: {costRate}%</p>
                 </div>
             )
         }
@@ -513,11 +561,19 @@ export default function DashboardContainer() {
                 <div className="space-x-5 w-full flex items-center justify-evenly">
                     {/* Income */}
                     <ShowData title="income" currencyType={session?.user.currency} num={totalIncome} prevRate={prevCompIncome}
-                        onClick={() => setType("income")} />
+                        onClick={() => {
+                            setType("income");
+                            setDisplayCategory(resourceInc);
+                            setPrevDisplayCategory(prevResourceInc);
+                        }} />
 
                     {/* Expenses */}
                     <ShowData title="expenses" currencyType={session?.user.currency} num={totalExpese} prevRate={prevCompExpense}
-                        onClick={() => setType("expenses")} />
+                        onClick={() => {
+                            setType("expenses");
+                            setDisplayCategory(categoryExp);
+                            setPrevDisplayCategory(categoryPrevExp);
+                        }} />
                     {/* Savings */}
 
                     <ShowData title="saving" currencyType={session?.user.currency} num={totalSaving} prevRate={prevCompSaving}
@@ -724,10 +780,20 @@ export default function DashboardContainer() {
 
                     {/* Category */}
                     <div className="w-full bg-white rounded-xl shadow-xl px-2 py-1">
-                        <PieChart width={480} height={400}>
-                            <Tooltip content={<CustomToolTipCategory />} />
-                            <Pie data={categoryExp} dataKey="costRate" cx="50%" cy="50%" outerRadius={180} fill="#ffaf33" />
-                        </PieChart>
+                        {graphChange === "default" ?
+                            // current 
+                            <PieChart width={480} height={400}>
+                                <Tooltip content={<CustomToolTipCategory />} />
+                                <Pie data={displayCategory} dataKey="costRate" cx="50%" cy="50%" outerRadius={180} fill="#ffaf33" />
+                            </PieChart>
+                            :
+                            // Comp
+                            <PieChart width={480} height={400}>
+                                <Tooltip content={<CustomToolTipCategory />} />
+                                <Pie data={displayCategory} dataKey="costRate" cx="50%" cy="50%" outerRadius={120} fill="#ffaf33" />
+                                <Pie data={prevDisplayCategory} dataKey="costRate" cx="50%" cy="50%" innerRadius={130} outerRadius={180} fill="#f0dec4" />
+                            </PieChart>
+                        }
                     </div>
                 </div>
             </div >
