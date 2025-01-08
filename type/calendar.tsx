@@ -54,4 +54,31 @@ export function Day(
             isSelected={isInRange(day, selectedDay, hoveredDay)}
         />
     );
+};
+
+export type CalendarFixingType = {
+    id: string;
+    incomeresource?: { name: string },
+    incomecategory?: { name: string },
+    income_amount?: number,
+    object?: string,
+    income_status?: boolean,
+    dateString: string,
+    dateCalendar: string,
+    currency: { name: string },
+};
+
+export type CalendarGraphType = {
+    date: string;
+    amount: number;
+    dayOfWeek: string;
+    label: string;
+}
+
+export type CalendarGraphCombineType = {
+    dateCurr: string;
+    currAmount: number;
+    datePrev: string;
+    prevAmount: number;
+    label: string;
 }

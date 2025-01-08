@@ -1,7 +1,7 @@
 "use client";
 import { generateDateFormat } from "@/data/date";
 import paths from "@/paths";
-import { Day } from "@/type/calendar";
+import { CalendarGraphCombineType, CalendarGraphType, Day } from "@/type/calendar";
 import CurrencyIcon from "@/type/currency";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
@@ -10,14 +10,27 @@ import { PickersDayProps } from "@mui/x-date-pickers/PickersDay";
 import dayjs, { Dayjs } from "dayjs";
 import { Session } from "next-auth";
 import { redirect, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import ChartSection from "./chart";
+import { useEffect, useState } from "react";
 import RecordContainer from "./record-container";
 import { MdSort } from "react-icons/md";
+import { RecordEditCurrentType } from "@/type/records";
+import { CalendarFixingRecords, CalendarFixingRecordsCombine } from "@/data/calendar";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, LineChart, Line, ComposedChart } from "recharts";
+import { currencyTypeString } from "@/data/currency";
+import { IoIosOptions } from "react-icons/io";
+import { FaCheck } from "react-icons/fa";
 
 interface RecordsIncomeProps {
     session: Session | null;
 }
+
+type CustomTooltipProps = {
+    payload?: { payload: CalendarGraphType }[]; // `payload` from Recharts passed in
+};
+
+type CustomeTooltipCompProps = {
+    payload?: { payload: CalendarGraphCombineType }[];
+};
 
 export default function RecordsIncome({ session }: RecordsIncomeProps) {
     // get query data
@@ -34,6 +47,30 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
         chart: "bar", type: "default"
     });
     const [showCalendar, setShowCalendar] = useState(false);
+    const [data, setData] = useState<{
+        isFetched: boolean,
+        records: {
+            id: string,
+            resource: string,
+            category: string,
+            amount: number,
+            status: boolean,
+            date: string,
+            url: string,
+            currencyType: string,
+        }[],
+        total: number,
+    }>({
+        isFetched: false,
+        records: [],
+        total: 0,
+    });
+    const [calendarData, setCalendarData] = useState<{ current: CalendarGraphType[], combined: CalendarGraphCombineType[] }>({
+        current: [],
+        combined: [],
+    });
+    const [rate, setRate] = useState<number>(0);
+    const [graphOption, setGraphOption] = useState(false);
 
     const handleCalendarDate = (date: Dayjs | null) => {
         if (!date) return;
@@ -66,7 +103,109 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
 
     const handleSubmitCalendarDate = () => {
         redirect(`${paths.recordsPageUrl()}?from=${dayjs(from.date)}&to=${dayjs(to.date)}`);
-    }
+    };
+
+    // CustomToolTip
+    const CustomeToolTip = (({ payload }: CustomTooltipProps) => {
+        if (payload && payload.length > 0) {
+            const { label, amount } = payload[0].payload;
+
+            return (
+                <div className="bg-white border-2 border-slate-800 border-solid rounded-md px-3 py-2 flex flex-col items-start">
+                    <h3 className="text-base font-[700] text-slate-800">{label}</h3>
+                    <p className="text-base font-[700] text-[#ffaf33]">amount: {amount}</p>
+                </div>
+            )
+        }
+        return null;
+    });
+
+    const CustomToolTipComp = (({ payload }: CustomeTooltipCompProps) => {
+        if (payload && payload.length > 0) {
+            const { dateCurr, currAmount, datePrev, prevAmount } = payload[0].payload;
+
+            return (
+                <div className="bg-white border-2 border-slate-800 border-solid rounded-md px-3 py-2 flex flex-col items-start">
+                    <h3 className="text-base font-[700] text-slate-800">Amount</h3>
+                    <p className="text-base font-[700] text-[#ffaf33]">{dateCurr}: {currAmount}</p>
+                    <p className="text-base font-[700] text-[#c6ae8b]">{datePrev}: {prevAmount}</p>
+                </div>
+            )
+        }
+    });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const duration = (new Date(to.date)).setHours(0, 0, 0, 0) - (new Date(from.date)).setHours(0, 0, 0, 0);
+            const fixed = ({
+                from: (new Date(from.date)).setHours(0, 0, 0, 0),
+                to: (new Date(to.date)).setHours(0, 0, 0, 0),
+                prevFrom: (new Date(from.date)).setHours(0, 0, 0, 0) - duration - 86400000,
+                prevTo: (new Date(to.date)).setHours(0, 0, 0, 0) - duration - 1,
+            });
+            const response = await fetch(paths.recordsIncomeFectchUrl(), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    from: fixed.from,
+                    to: fixed.to,
+                    prevFrom: fixed.prevFrom,
+                    prevTo: fixed.prevTo,
+                }),
+            });
+
+            const result = await response.json();
+            // Current Data setting
+            setData({
+                isFetched: true, records: result.current.map((record: RecordEditCurrentType) => {
+                    return ({
+                        id: record.id,
+                        resource: record.incomeresource.name,
+                        category: record.incomecategory.name,
+                        image: record.object,
+                        status: record.income_status,
+                        date: record.dateCalendar,
+                        currencyType: record.currency.name,
+                        amount: record.income_amount,
+                        url: `${paths.recordEditPageUrl()}/${record.id}`,
+                    })
+                }), total: result.current.reduce((sum: number, record: RecordEditCurrentType) => sum += ((record.income_amount * 100) | 0), 0) / 100
+            });
+
+            const { total: currentTotal, data: currentData }: { total: number, data: CalendarGraphType[] } = CalendarFixingRecords({ data: result.current, from: fixed.from, to: fixed.to });
+            const { total: prevTotal, data: prevData }: { total: number, data: CalendarGraphType[] } = CalendarFixingRecords({ data: result.prev, from: fixed.prevFrom, to: fixed.prevTo });
+
+            // Calc rate
+            const calcRate = Number(((currentTotal - prevTotal) / prevTotal * 100).toFixed(2));
+
+            const { data: combinedData }: { data: CalendarGraphCombineType[] } = CalendarFixingRecordsCombine({ current: currentData, prev: prevData });
+
+            setCalendarData({ current: currentData, combined: combinedData });
+            setRate(calcRate);
+        }
+
+        if (!data.isFetched) {
+            fetchData()
+                .catch((err: unknown) => {
+                    if (err instanceof Error) {
+                        console.log(err.message);
+                    } else {
+                        console.log("Internal Server Error");
+                    }
+                });
+            setData((prev) => ({ ...prev, isFetched: true }));
+        }
+
+    }, [data, from, to]);
+
+    useEffect(() => {
+        console.log({ records: data.records });
+        console.log({ total: data.total });
+        console.log({ CalendarData: calendarData });
+        console.log({ rate: rate });
+    }, [data, calendarData, rate])
 
     return (
         <>
@@ -76,11 +215,11 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
                     <div className="flex items-center">
                         <div className="text-4xl text-slate-800 font-[700]">
                             <span className="mr-3"><CurrencyIcon currencyType={session?.user.currency || ""} /></span>
-                            0
+                            {data.total}
                         </div>
                     </div>
                     <div className="text-base font-[500]">
-                        <span className={`text-red-500`}>-100% reduced</span>
+                        <span className={`${rate < 0 ? "text-red-500" : "text-green-500"}`}>{rate}% {rate < 0 ? "reduced" : "increased"}</span>
                     </div>
                 </div>
             </div>
@@ -121,72 +260,150 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
                                 </div>
 
                                 {/* Calendar Display */}
-                                <div className="relative z-10 shrink-0 flex items-center justify-end">
-                                    <div className="rounded-md bg-gray-400/50 px-3 py-1 text-slate-800 cursor-pointer" onClick={() => setShowCalendar(true)}>
-                                        <div className="flex items-center">
-                                            <label className="flex flex-col items-start mr-5 cursor-pointer">
-                                                <span className="text-xs">
-                                                    From
-                                                </span>
-                                                <p className="text-base font-[600]">
-                                                    {generateDateFormat(from.date)}
-                                                </p>
-                                            </label>
-                                            <label className="flex flex-col items-start cursor-pointer">
-                                                <span className="text-xs">
-                                                    To
-                                                </span>
-                                                <p className="text-base font-[600]">
-                                                    {generateDateFormat(to.date)}
-                                                </p>
-                                            </label>
+                                <div className="flex items-center gap-4">
+                                    <div className="relative z-10 shrink-0 flex items-center justify-end">
+                                        <div className="rounded-md bg-gray-400/50 px-3 py-1 text-slate-800 cursor-pointer" onClick={() => setShowCalendar(true)}>
+                                            <div className="flex items-center">
+                                                <label className="flex flex-col items-start mr-5 cursor-pointer">
+                                                    <span className="text-xs">
+                                                        From
+                                                    </span>
+                                                    <p className="text-base font-[600]">
+                                                        {generateDateFormat(from.date)}
+                                                    </p>
+                                                </label>
+                                                <label className="flex flex-col items-start cursor-pointer">
+                                                    <span className="text-xs">
+                                                        To
+                                                    </span>
+                                                    <p className="text-base font-[600]">
+                                                        {generateDateFormat(to.date)}
+                                                    </p>
+                                                </label>
+                                            </div>
                                         </div>
+                                        {showCalendar &&
+                                            <div className="absolute top-[48px] right-0 left-auto  bg-white rounded-md shadow-md p-2">
+                                                <form className="flex flex-col items-center" action={handleSubmitCalendarDate}>
+                                                    {/* Calendar */}
+                                                    <div className="flex items-center">
+                                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                            <DateCalendar
+                                                                value={(from.calendar || to.calendar) ? dayjs(from.date) : null}
+                                                                onChange={handleCalendarDate}
+                                                                showDaysOutsideCurrentMonth
+                                                                displayWeekNumber
+                                                                slots={{ day: Day }}
+                                                                slotProps={{
+                                                                    day: () =>
+                                                                        ({
+                                                                            selectedDay: dayjs(from.date),
+                                                                            hoveredDay: dayjs(to.date),
+                                                                        }) as Partial<PickersDayProps<Dayjs>>
+                                                                }}
+                                                            />
+                                                        </LocalizationProvider>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 w-full -mt-10 z-10">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setShowCalendar(false)}
+                                                            className="w-full bg-gray-500 rounded-md px-2 py-1 text-white hover:bg-gray-500/50 text-base"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <button
+                                                            type="submit"
+                                                            className="w-full bg-red-500 rounded-md px-2 py-1 text-white hover:bg-red-500/50 text-base"
+                                                        >
+                                                            Apply
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        }
                                     </div>
-                                    {showCalendar &&
-                                        <div className="absolute top-[48px] right-0 left-auto  bg-white rounded-md shadow-md p-2">
-                                            <form className="flex flex-col items-center" action={handleSubmitCalendarDate}>
-                                                {/* Calendar */}
-                                                <div className="flex items-center">
-                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                        <DateCalendar
-                                                            value={(from.calendar || to.calendar) ? dayjs(from.date) : null}
-                                                            onChange={handleCalendarDate}
-                                                            showDaysOutsideCurrentMonth
-                                                            displayWeekNumber
-                                                            slots={{ day: Day }}
-                                                            slotProps={{
-                                                                day: () =>
-                                                                    ({
-                                                                        selectedDay: dayjs(from.date),
-                                                                        hoveredDay: dayjs(to.date),
-                                                                    }) as Partial<PickersDayProps<Dayjs>>
-                                                            }}
-                                                        />
-                                                    </LocalizationProvider>
-                                                </div>
-                                                <div className="flex items-center gap-2 w-full -mt-10 z-10">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setShowCalendar(false)}
-                                                        className="w-full bg-gray-500 rounded-md px-2 py-1 text-white hover:bg-gray-500/50 text-base"
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                    <button
-                                                        type="submit"
-                                                        className="w-full bg-red-500 rounded-md px-2 py-1 text-white hover:bg-red-500/50 text-base"
-                                                    >
-                                                        Apply
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    }
+
+                                    {/* graph type change */}
+                                    <button className="bg-white/50 hover:bg-gray-300/30 border-2 border-solid border-slate-800 rounded-md shadow-md p-2"
+                                        onClick={() => setGraphOption(true)}
+                                    >
+                                        <IoIosOptions size={24} className="text-slate-800"/>
+                                    </button>
                                 </div>
                             </div>
 
                             {/* Graph */}
-                            <ChartSection chart={chartType.chart} type={chartType.type} />
+                            <div className="bg-white rounded-md w-full px-2 py-1">
+                                {chartType.chart === "bar" ?
+                                    (chartType.type === "default" ?
+                                        < BarChart width={700} height={400} className="w-full" data={calendarData.current}>
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey={"date"} />
+                                            <YAxis label={{ value: `${session?.user.currency}[${currencyTypeString(session?.user.currency || "").currency}]`, angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
+                                            <Tooltip content={<CustomeToolTip />} />
+                                            {/* <Tooltip /> */}
+                                            {/* <Legend /> */}
+                                            <Bar dataKey={"amount"} fill="#ffaf33" />
+                                        </BarChart>
+                                        :
+                                        < BarChart width={700} height={400} className="w-full" data={calendarData.combined}>
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey={"label"} />
+                                            <YAxis label={{ value: `${session?.user.currency}[${currencyTypeString(session?.user.currency || "").currency}]`, angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
+                                            <Tooltip content={<CustomToolTipComp />} />
+                                            <Bar dataKey={"prevAmount"} fill="#c6ae8b" />
+                                            <Bar dataKey={"currAmount"} fill="#ffaf33" />
+                                        </BarChart>
+                                    )
+                                    :
+                                    chartType.chart === "line" ?
+                                        (chartType.type === "default" ?
+                                            < LineChart width={700} height={400} className="w-full" data={calendarData.current}>
+                                                <CartesianGrid strokeDasharray="3 3" />
+                                                <XAxis dataKey={"date"} />
+                                                <YAxis label={{ value: `${session?.user.currency}[${currencyTypeString(session?.user.currency || "").currency}]`, angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
+                                                <Tooltip content={<CustomeToolTip />} />
+                                                {/* <Tooltip /> */}
+                                                {/* <Legend /> */}
+                                                <Line type="monotone" dataKey={"amount"} stroke="#ffaf33" strokeWidth={3} />
+                                            </LineChart>
+                                            :
+                                            < LineChart width={700} height={400} className="w-full" data={calendarData.combined}>
+                                                <CartesianGrid strokeDasharray="3 3" />
+                                                <XAxis dataKey={"label"} />
+                                                <YAxis label={{ value: `${session?.user.currency}[${currencyTypeString(session?.user.currency || "").currency}]`, angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
+                                                <Tooltip content={<CustomToolTipComp />} />
+                                                <Line type="monotone" dataKey={"prevAmount"} stroke="#f0dec4" strokeWidth={3} />
+                                                <Line type="monotone" dataKey={"currAmount"} stroke="#ffaf33" strokeWidth={3} />
+                                            </LineChart>
+                                        )
+                                        :
+                                        (chartType.type === "default" ?
+                                            < ComposedChart width={700} height={400} className="w-full" data={calendarData.current}>
+                                                <CartesianGrid strokeDasharray="3 3" />
+                                                <XAxis dataKey={"date"} />
+                                                <YAxis label={{ value: `${session?.user.currency}[${currencyTypeString(session?.user.currency || "").currency}]`, angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
+                                                <Tooltip content={<CustomeToolTip />} />
+                                                {/* <Tooltip /> */}
+                                                {/* <Legend /> */}
+                                                <Bar dataKey={"amount"} fill="#ffaf33" />
+                                                <Line type="monotone" dataKey={"amount"} stroke="#ffaf33" strokeWidth={3} />
+                                            </ComposedChart>
+                                            :
+                                            < ComposedChart width={700} height={400} className="w-full" data={calendarData.combined}>
+                                                <CartesianGrid strokeDasharray="3 3" />
+                                                <XAxis dataKey={"label"} />
+                                                <YAxis label={{ value: `${session?.user.currency}[${currencyTypeString(session?.user.currency || "").currency}]`, angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
+                                                <Tooltip content={<CustomToolTipComp />} />
+                                                <Bar dataKey={"prevAmount"} fill="#c6ae8b" />
+                                                <Bar dataKey={"currAmount"} fill="#ffaf33" />
+                                                <Line type="monotone" dataKey={"prevAmount"} stroke="#f0dec4" strokeWidth={3} />
+                                                <Line type="monotone" dataKey={"currAmount"} stroke="#ffaf33" strokeWidth={3} />
+                                            </ComposedChart>
+                                        )
+                                }
+                            </div>
                         </div>
 
                         {/* Records with Edits & Deletes */}
@@ -204,19 +421,54 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
                             {/* Record Edit & Delete */}
                             <div className="absolute top-0 left-0 right-0">
                                 <div className="flex flex-col justify-start items-center gap-3">
-                                    <RecordContainer recordId={"12"} currency={session?.user.currency || ""} content="income" resource={"Employee"} category={"Salary"} amount={1200.23} editUrl={"#"} />
-
-                                    <RecordContainer recordId={"12"} currency={session?.user.currency || ""} content="income" resource={"Employee"} category={"Salary"} amount={1200.23} editUrl={"#"} />
-
-                                    <RecordContainer recordId={"12"} currency={session?.user.currency || ""} content="income" resource={"Employee"} category={"Salary"} amount={1200.23} editUrl={"#"} />
-
-                                    <RecordContainer recordId={"12"} currency={session?.user.currency || ""} content="income" resource={"Employee"} category={"Salary"} amount={1200.23} editUrl={"#"} />
+                                    {(data.records && data.records.length > 0) &&
+                                        (data.records.map((record, key) => (
+                                            <RecordContainer key={key} recordId={record.id} currency={record.currencyType} content="income" resource={record.resource} category={record.category} amount={record.amount} editUrl={record.url} />
+                                        )))
+                                    }
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {graphOption &&
+                <div className="relative z-[999]">
+                    <div className="inset-0 fixed bg-white/50"/>
+                    <div className="inset-0 fixed flex items-center justify-center">
+                        <div className="sm:w-[480px] w-full bg-white rounded-md border-2 border-solid border-slate-800 px-4 py-3 flex flex-col items-start">
+                            {/* Title */}
+                            <h2 className="text-xl font-[700] text-slate-800 mb-5">Graph Type Change</h2>
+                            <div className="grid grid-cols-[1fr_1fr] gap-2 w-full">
+                                {/* Default */}
+                                <button className={`${chartType.type === "default" ? "bg-green-500/30 hover:bg-green-300/30" : "bg-slate-500/30 hover:bg-slate-300/30" } flex items-center gap-2 px-2 py-1 rounded-full`}
+                                    type="button"
+                                    onClick={() => {
+                                        setChartType((prev) => ({...prev, type: "default"}));
+                                        setGraphOption(false);
+                                    }}
+                                >
+                                    {chartType.type === "default" && <FaCheck size={24} className="text-green-500 group-hover:text-green-500/50"/>}
+                                    <p className={`${chartType.type === "default" ? "text-green-500 group-hover:text-green-500/50" : "text-slate-800 group-hover:text-slate-800/50" } text-lg`}>Default</p>
+                                </button>
+
+                                {/* Comparison */}
+                                <button className={`${chartType.type === "comparison" ? "bg-green-500/30 hover:bg-green-300/30" : "bg-slate-500/30 hover:bg-slate-300/30" } flex items-center gap-2 px-2 py-1 rounded-full`}
+                                    type="button"
+                                    onClick={() => {
+                                        setChartType((prev) => ({...prev, type: "comparison"}));
+                                        setGraphOption(false);
+                                    }}
+                                >
+                                    {chartType.type === "comparison" && <FaCheck size={24} className="text-green-500 group-hover:text-green-500/50"/>}
+                                    <p className={`${chartType.type === "comparison" ? "text-green-500 group-hover:text-green-500/50" : "text-slate-800 group-hover:text-slate-800/50" } text-lg`}>Comparison</p>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         </>
     )
 }

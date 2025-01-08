@@ -65,6 +65,12 @@ const paths = {
     dashboardFetchUrl() {
         return "server/dashboard/fetch/type";
     },
+    recordsIncomeFectchUrl() {
+        return "server/records/income";
+    },
+    recordEditPageUrl() {
+        return "/records/income/edit";
+    },
 }
 
 export default paths;
