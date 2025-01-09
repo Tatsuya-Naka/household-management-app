@@ -1,7 +1,7 @@
 "use client";
 import { generateDateFormat } from "@/data/date";
 import paths from "@/paths";
-import { CalendarGraphCombineType, CalendarGraphType, Day } from "@/type/calendar";
+import { CalendarExpensesGraphCombineType, CalendarExpensesGraphType, Day } from "@/type/calendar";
 import CurrencyIcon from "@/type/currency";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import RecordContainer from "./record-container";
 import { MdSort } from "react-icons/md";
 import { RecordEditCurrentType } from "@/type/records";
-import { CalendarFixingRecords, CalendarFixingRecordsCombine } from "@/data/calendar";
+import { CalendarFixingExpensesRecords, CalendarFixingRecordsExpensesCombine } from "@/data/calendar";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, LineChart, Line, ComposedChart } from "recharts";
 import { currencyTypeString } from "@/data/currency";
 import { IoIosOptions } from "react-icons/io";
@@ -25,14 +25,14 @@ interface RecordsIncomeProps {
 }
 
 type CustomTooltipProps = {
-    payload?: { payload: CalendarGraphType }[]; // `payload` from Recharts passed in
+    payload?: { payload: CalendarExpensesGraphType }[]; // `payload` from Recharts passed in
 };
 
 type CustomeTooltipCompProps = {
-    payload?: { payload: CalendarGraphCombineType }[];
+    payload?: { payload: CalendarExpensesGraphCombineType }[];
 };
 
-export default function RecordsIncome({ session }: RecordsIncomeProps) {
+export default function RecordsExpenses({ session }: RecordsIncomeProps) {
     // get query data
     const params = useSearchParams();
     const [from, setFrom] = useState({
@@ -51,14 +51,13 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
         isFetched: boolean,
         records: {
             id: string,
-            resource: string,
-            category: string,
-            amount: number,
-            status: boolean,
+            genre: string,
+            items: { name: string, cost: number }[],
             date: string,
             url: string,
             currencyType: string,
-            image: string,
+            totalcost: number,
+            image: string
         }[],
         total: number,
     }>({
@@ -66,7 +65,7 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
         records: [],
         total: 0,
     });
-    const [calendarData, setCalendarData] = useState<{ current: CalendarGraphType[], combined: CalendarGraphCombineType[] }>({
+    const [calendarData, setCalendarData] = useState<{ current: CalendarExpensesGraphType[], combined: CalendarExpensesGraphCombineType[] }>({
         current: [],
         combined: [],
     });
@@ -103,18 +102,18 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
     };
 
     const handleSubmitCalendarDate = () => {
-        redirect(`${paths.recordsIncomeUrl()}?from=${dayjs(from.date)}&to=${dayjs(to.date)}`);
+        redirect(`${paths.recordsExpensesUrl()}?from=${dayjs(from.date)}&to=${dayjs(to.date)}`);
     };
 
     // CustomToolTip
     const CustomeToolTip = (({ payload }: CustomTooltipProps) => {
         if (payload && payload.length > 0) {
-            const { label, amount } = payload[0].payload;
+            const { label, costs } = payload[0].payload;
 
             return (
                 <div className="bg-white border-2 border-slate-800 border-solid rounded-md px-3 py-2 flex flex-col items-start">
                     <h3 className="text-base font-[700] text-slate-800">{label}</h3>
-                    <p className="text-base font-[700] text-[#ffaf33]">amount: {amount}</p>
+                    <p className="text-base font-[700] text-[#ffaf33]">amount: {costs}</p>
                 </div>
             )
         }
@@ -123,13 +122,13 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
 
     const CustomToolTipComp = (({ payload }: CustomeTooltipCompProps) => {
         if (payload && payload.length > 0) {
-            const { dateCurr, currAmount, datePrev, prevAmount } = payload[0].payload;
+            const { dateCurr, currCosts, datePrev, prevCosts } = payload[0].payload;
 
             return (
                 <div className="bg-white border-2 border-slate-800 border-solid rounded-md px-3 py-2 flex flex-col items-start">
                     <h3 className="text-base font-[700] text-slate-800">Amount</h3>
-                    <p className="text-base font-[700] text-[#ffaf33]">{dateCurr}: {currAmount}</p>
-                    <p className="text-base font-[700] text-[#c6ae8b]">{datePrev}: {prevAmount}</p>
+                    <p className="text-base font-[700] text-[#ffaf33]">{dateCurr}: {currCosts}</p>
+                    <p className="text-base font-[700] text-[#c6ae8b]">{datePrev}: {prevCosts}</p>
                 </div>
             )
         }
@@ -144,7 +143,7 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
                 prevFrom: (new Date(from.date)).setHours(0, 0, 0, 0) - duration - 86400000,
                 prevTo: (new Date(to.date)).setHours(0, 0, 0, 0) - duration - 1,
             });
-            const response = await fetch(paths.recordsIncomeFectchUrl(), {
+            const response = await fetch(paths.recordsExpensesFetchUrl(), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -158,30 +157,33 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
             });
 
             const result = await response.json();
+            console.log()
             // Current Data setting
             setData({
                 isFetched: true, records: result.current.map((record: RecordEditCurrentType) => {
                     return ({
                         id: record.id,
-                        resource: record.incomeresource.name,
-                        category: record.incomecategory.name,
-                        image: record.object,
-                        status: record.income_status,
+                        genre: record.genre,
+                        items: record.Items.map(({item, cost}: {item: string, cost: number}) => {
+                            return {
+                                name: item, cost
+                            }
+                        }),
                         date: record.dateCalendar,
                         currencyType: record.currency.name,
-                        amount: record.income_amount,
-                        url: `${paths.recordEditPageUrl()}/${record.id}`,
+                        url: `${paths.recordExpensesEditPage()}/${record.id}`,
+                        totalcost: record.totalcost,
                     })
-                }), total: result.current.reduce((sum: number, record: RecordEditCurrentType) => sum += ((record.income_amount * 100) | 0), 0) / 100
+                }), total: result.current.reduce((sum: number, record: RecordEditCurrentType) => sum += ((record.totalcost * 100) | 0), 0) / 100
             });
 
-            const { total: currentTotal, data: currentData }: { total: number, data: CalendarGraphType[] } = CalendarFixingRecords({ data: result.current, from: fixed.from, to: fixed.to });
-            const { total: prevTotal, data: prevData }: { total: number, data: CalendarGraphType[] } = CalendarFixingRecords({ data: result.prev, from: fixed.prevFrom, to: fixed.prevTo });
-
+            const { total: currentTotal, data: currentData }: { total: number, data: CalendarExpensesGraphType[] } = CalendarFixingExpensesRecords({ data: result.current, from: fixed.from, to: fixed.to });
+            const { total: prevTotal, data: prevData }: { total: number, data: CalendarExpensesGraphType[] } = CalendarFixingExpensesRecords({ data: result.prev, from: fixed.prevFrom, to: fixed.prevTo });
+            console.log({currTotal: currentTotal})
             // Calc rate
             const calcRate = Number(((currentTotal - prevTotal) / prevTotal * 100).toFixed(2));
 
-            const { data: combinedData }: { data: CalendarGraphCombineType[] } = CalendarFixingRecordsCombine({ current: currentData, prev: prevData });
+            const { data: combinedData }: { data: CalendarExpensesGraphCombineType[] } = CalendarFixingRecordsExpensesCombine({ current: currentData, prev: prevData });
 
             setCalendarData({ current: currentData, combined: combinedData });
             setRate(calcRate);
@@ -220,7 +222,7 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
                         </div>
                     </div>
                     <div className="text-base font-[500]">
-                        <span className={`${rate < 0 ? "text-red-500" : "text-green-500"}`}>{rate}% {rate < 0 ? "reduced" : "increased"}</span>
+                        <span className={`${rate < 0 ? "text-green-500" : "text-red-500"}`}>{rate}% {rate < 0 ? "reduced" : "increased"}</span>
                     </div>
                 </div>
             </div>
@@ -228,7 +230,7 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
             {/* Graph & Data with Edits and Deletes */}
             <div className="absolute top-0 w-full left-0 right-0">
                 <div className="pt-12 px-5">
-                    <h2 className="text-4xl font-[700] text-slate-800 mb-3">Income</h2>
+                    <h2 className="text-4xl font-[700] text-slate-800 mb-3">Expenses</h2>
                     <div className="grid grid-cols-[1fr_1fr] w-full">
                         {/* Graph */}
                         <div className="grid grid-rows-[80px_auto] ml-2 mr-5">
@@ -329,7 +331,7 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
                                     <button className="bg-white/50 hover:bg-gray-300/30 border-2 border-solid border-slate-800 rounded-md shadow-md p-2"
                                         onClick={() => setGraphOption(true)}
                                     >
-                                        <IoIosOptions size={24} className="text-slate-800"/>
+                                        <IoIosOptions size={24} className="text-slate-800" />
                                     </button>
                                 </div>
                             </div>
@@ -345,7 +347,7 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
                                             <Tooltip content={<CustomeToolTip />} />
                                             {/* <Tooltip /> */}
                                             {/* <Legend /> */}
-                                            <Bar dataKey={"amount"} fill="#ffaf33" />
+                                            <Bar dataKey={"costs"} fill="#ffaf33" />
                                         </BarChart>
                                         :
                                         < BarChart width={700} height={400} className="w-full" data={calendarData.combined}>
@@ -353,8 +355,8 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
                                             <XAxis dataKey={"label"} />
                                             <YAxis label={{ value: `${session?.user.currency}[${currencyTypeString(session?.user.currency || "").currency}]`, angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
                                             <Tooltip content={<CustomToolTipComp />} />
-                                            <Bar dataKey={"prevAmount"} fill="#c6ae8b" />
-                                            <Bar dataKey={"currAmount"} fill="#ffaf33" />
+                                            <Bar dataKey={"prevCosts"} fill="#c6ae8b" />
+                                            <Bar dataKey={"currCosts"} fill="#ffaf33" />
                                         </BarChart>
                                     )
                                     :
@@ -367,7 +369,7 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
                                                 <Tooltip content={<CustomeToolTip />} />
                                                 {/* <Tooltip /> */}
                                                 {/* <Legend /> */}
-                                                <Line type="monotone" dataKey={"amount"} stroke="#ffaf33" strokeWidth={3} />
+                                                <Line type="monotone" dataKey={"costs"} stroke="#ffaf33" strokeWidth={3} />
                                             </LineChart>
                                             :
                                             < LineChart width={700} height={400} className="w-full" data={calendarData.combined}>
@@ -375,8 +377,8 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
                                                 <XAxis dataKey={"label"} />
                                                 <YAxis label={{ value: `${session?.user.currency}[${currencyTypeString(session?.user.currency || "").currency}]`, angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
                                                 <Tooltip content={<CustomToolTipComp />} />
-                                                <Line type="monotone" dataKey={"prevAmount"} stroke="#f0dec4" strokeWidth={3} />
-                                                <Line type="monotone" dataKey={"currAmount"} stroke="#ffaf33" strokeWidth={3} />
+                                                <Line type="monotone" dataKey={"prevCosts"} stroke="#f0dec4" strokeWidth={3} />
+                                                <Line type="monotone" dataKey={"currCosts"} stroke="#ffaf33" strokeWidth={3} />
                                             </LineChart>
                                         )
                                         :
@@ -388,8 +390,8 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
                                                 <Tooltip content={<CustomeToolTip />} />
                                                 {/* <Tooltip /> */}
                                                 {/* <Legend /> */}
-                                                <Bar dataKey={"amount"} fill="#ffaf33" />
-                                                <Line type="monotone" dataKey={"amount"} stroke="#ffaf33" strokeWidth={3} />
+                                                <Bar dataKey={"costs"} fill="#ffaf33" />
+                                                <Line type="monotone" dataKey={"costs"} stroke="#ffaf33" strokeWidth={3} />
                                             </ComposedChart>
                                             :
                                             < ComposedChart width={700} height={400} className="w-full" data={calendarData.combined}>
@@ -397,10 +399,10 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
                                                 <XAxis dataKey={"label"} />
                                                 <YAxis label={{ value: `${session?.user.currency}[${currencyTypeString(session?.user.currency || "").currency}]`, angle: -90, position: `insideLeft`, style: { textAnchor: `middle` } }} />
                                                 <Tooltip content={<CustomToolTipComp />} />
-                                                <Bar dataKey={"prevAmount"} fill="#c6ae8b" />
-                                                <Bar dataKey={"currAmount"} fill="#ffaf33" />
-                                                <Line type="monotone" dataKey={"prevAmount"} stroke="#f0dec4" strokeWidth={3} />
-                                                <Line type="monotone" dataKey={"currAmount"} stroke="#ffaf33" strokeWidth={3} />
+                                                <Bar dataKey={"prevCosts"} fill="#c6ae8b" />
+                                                <Bar dataKey={"currCosts"} fill="#ffaf33" />
+                                                <Line type="monotone" dataKey={"prevCosts"} stroke="#f0dec4" strokeWidth={3} />
+                                                <Line type="monotone" dataKey={"currCosts"} stroke="#ffaf33" strokeWidth={3} />
                                             </ComposedChart>
                                         )
                                 }
@@ -424,7 +426,7 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
                                 <div className="flex flex-col justify-start items-center gap-3">
                                     {(data.records && data.records.length > 0) &&
                                         (data.records.map((record, key) => (
-                                            <RecordContainer key={key} recordId={record.id} currency={record.currencyType} content="income" resource={record.resource} category={record.category} amount={record.amount} editUrl={record.url} />
+                                            <RecordContainer key={key} recordId={record.id} currency={record.currencyType} content="expenses" genre={record.genre} items={record.items} amount={record.totalcost} editUrl={record.url} />
                                         )))
                                     }
                                 </div>
@@ -436,34 +438,34 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
 
             {graphOption &&
                 <div className="relative z-[999]">
-                    <div className="inset-0 fixed bg-white/50"/>
+                    <div className="inset-0 fixed bg-white/50" />
                     <div className="inset-0 fixed flex items-center justify-center">
                         <div className="sm:w-[480px] w-full bg-white rounded-md border-2 border-solid border-slate-800 px-4 py-3 flex flex-col items-start">
                             {/* Title */}
                             <h2 className="text-xl font-[700] text-slate-800 mb-5">Graph Type Change</h2>
                             <div className="grid grid-cols-[1fr_1fr] gap-2 w-full">
                                 {/* Default */}
-                                <button className={`${chartType.type === "default" ? "bg-green-500/30 hover:bg-green-300/30" : "bg-slate-500/30 hover:bg-slate-300/30" } flex items-center gap-2 px-2 py-1 rounded-full`}
+                                <button className={`${chartType.type === "default" ? "bg-green-500/30 hover:bg-green-300/30" : "bg-slate-500/30 hover:bg-slate-300/30"} flex items-center gap-2 px-2 py-1 rounded-full`}
                                     type="button"
                                     onClick={() => {
-                                        setChartType((prev) => ({...prev, type: "default"}));
+                                        setChartType((prev) => ({ ...prev, type: "default" }));
                                         setGraphOption(false);
                                     }}
                                 >
-                                    {chartType.type === "default" && <FaCheck size={24} className="text-green-500 group-hover:text-green-500/50"/>}
-                                    <p className={`${chartType.type === "default" ? "text-green-500 group-hover:text-green-500/50" : "text-slate-800 group-hover:text-slate-800/50" } text-lg`}>Default</p>
+                                    {chartType.type === "default" && <FaCheck size={24} className="text-green-500 group-hover:text-green-500/50" />}
+                                    <p className={`${chartType.type === "default" ? "text-green-500 group-hover:text-green-500/50" : "text-slate-800 group-hover:text-slate-800/50"} text-lg`}>Default</p>
                                 </button>
 
                                 {/* Comparison */}
-                                <button className={`${chartType.type === "comparison" ? "bg-green-500/30 hover:bg-green-300/30" : "bg-slate-500/30 hover:bg-slate-300/30" } flex items-center gap-2 px-2 py-1 rounded-full`}
+                                <button className={`${chartType.type === "comparison" ? "bg-green-500/30 hover:bg-green-300/30" : "bg-slate-500/30 hover:bg-slate-300/30"} flex items-center gap-2 px-2 py-1 rounded-full`}
                                     type="button"
                                     onClick={() => {
-                                        setChartType((prev) => ({...prev, type: "comparison"}));
+                                        setChartType((prev) => ({ ...prev, type: "comparison" }));
                                         setGraphOption(false);
                                     }}
                                 >
-                                    {chartType.type === "comparison" && <FaCheck size={24} className="text-green-500 group-hover:text-green-500/50"/>}
-                                    <p className={`${chartType.type === "comparison" ? "text-green-500 group-hover:text-green-500/50" : "text-slate-800 group-hover:text-slate-800/50" } text-lg`}>Comparison</p>
+                                    {chartType.type === "comparison" && <FaCheck size={24} className="text-green-500 group-hover:text-green-500/50" />}
+                                    <p className={`${chartType.type === "comparison" ? "text-green-500 group-hover:text-green-500/50" : "text-slate-800 group-hover:text-slate-800/50"} text-lg`}>Comparison</p>
                                 </button>
                             </div>
                         </div>

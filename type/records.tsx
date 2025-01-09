@@ -10,6 +10,9 @@ export type RecordEditCurrentType = {
     currency: {
         name: number;
     }
+    genre: string;
+    Items: {item: string; cost: number}[];
+    totalcost: number;
 };
 
 export type RecordEditPrevType = {
@@ -23,4 +26,7 @@ export type RecordEditPrevType = {
     currency: {
         name: number;
     }
+    genre: string;
+    Items: {item: string; cost: number}[];
+    totalcost: number;
 };

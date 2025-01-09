@@ -63,13 +63,31 @@ const paths = {
         return "/server/new-record/cancel";
     },
     dashboardFetchUrl() {
-        return "server/dashboard/fetch/type";
+        return "/server/dashboard/fetch/type";
     },
     recordsIncomeFectchUrl() {
-        return "server/records/income";
+        return "/server/records/income";
+    },
+    recordsExpensesFetchUrl() {
+        return "/server/records/expenses";
+    },
+    recordsSavingsFetchUrl() {
+        return "/server/records/savings";
     },
     recordEditPageUrl() {
         return "/records/income/edit";
+    },
+    recordExpensesEditPage() {
+        return "/records/expenses/edit";
+    },
+    recordsIncomeUrl() {
+        return "/records/income";
+    },
+    recordsExpensesUrl() {
+        return "/records/expenses";
+    },
+    recordsSavingsUrl() {
+        return "/records/savings";
     },
 }
 

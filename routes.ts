@@ -28,6 +28,10 @@ export const privateRoutes = [
     paths.settingPageUrl(),
     paths.logOutPageUrl(),
     paths.newRecordConfirmUrl(),
+    paths.recordsIncomeUrl(),
+    paths.recordsExpensesUrl(),
+    paths.recordsSavingsUrl(),
+    paths.recordExpensesEditPage(),
 ]
 
 export const API_AUTH_PREFIX = paths.authPrefix();

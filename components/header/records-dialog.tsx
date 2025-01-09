@@ -91,19 +91,19 @@ export default function RecordsDialog({id, name, image, page}: IconsProps) {
                                 </h2>
                                 <div className="ml-4 flex flex-col items-start">
                                     <Link
-                                        href="/"
+                                        href={paths.recordsIncomeUrl()}
                                         className="hover:underline hover:underline-offset-4 text-base font-[500] mb-2"
                                     >
                                         Income
                                     </Link>
                                     <Link
-                                        href="/"
+                                        href={paths.recordsExpensesUrl()}
                                         className="hover:underline hover:underline-offset-4 text-base font-[500] mb-2"
                                     >
                                         Expenses
                                     </Link>
                                     <Link
-                                        href="/"
+                                        href={paths.recordsSavingsUrl()}
                                         className="hover:underline hover:underline-offset-4 text-base font-[500] mb-2"
                                     >
                                         Savings

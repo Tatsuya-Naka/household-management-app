@@ -68,6 +68,39 @@ export type CalendarFixingType = {
     currency: { name: string },
 };
 
+export type CalendarFixingExpensesType = {
+    id: string;
+    genre: string;
+    Items: { item: string; cost: number; };
+    totalcost: number;
+    object?: string,
+    dateString: string,
+    dateCalendar: string,
+    currency: { name: string },
+};
+
+export type CalendarFixingSavingsIncomeType = {
+    id: string;
+    incomeresource: { name: string },
+    incomecategory: { name: string },
+    income_amount: number,
+    dateString: string,
+    dateCalendar: string,
+    currency: { name: string },
+};
+
+
+export type CalendarFixingSavingsExpensesType = {
+    id: string;
+    genre: string;
+    Items: { cost: number; category: { name: string }; subcategory: { name: string } }[];
+    totalcost: number;
+    dateString: string,
+    dateCalendar: string,
+    currency: { name: string },
+};
+
+
 export type CalendarGraphType = {
     date: string;
     amount: number;
@@ -75,10 +108,77 @@ export type CalendarGraphType = {
     label: string;
 }
 
+export type CalendarExpensesGraphType = {
+    date: string;
+    costs: number;
+    dayOfWeek: string;
+    label: string;
+}
+
+export type CalendarSavingsGraphType = {
+    date: string;
+    savings: number;
+    dayOfWeek: string;
+    label: string;
+}
+
+
 export type CalendarGraphCombineType = {
     dateCurr: string;
     currAmount: number;
     datePrev: string;
     prevAmount: number;
     label: string;
+}
+
+export type CalendarExpensesGraphCombineType = {
+    dateCurr: string;
+    currCosts: number;
+    datePrev: string;
+    prevCosts: number;
+    label: string;
+}
+
+export type CalendarSavingsGraphCombineType = {
+    dateCurr: string;
+    currSavings: number;
+    datePrev: string;
+    prevSavings: number;
+    label: string;
+}
+
+export type CalendarIncomeGroupResourceType = {
+    resource: string;
+    rate: number;
+};
+
+export type CalendarIncomeGroupCategoryType = {
+    resource: string;
+    categories: {
+        category: string;
+        rate: number;
+    }[];
+};
+
+export type CalendarIncomeGroupType = {
+    resource: CalendarIncomeGroupResourceType[];
+    category: CalendarIncomeGroupCategoryType[];
+}
+
+export type CalendarExpensesCategoryType = {
+    category: string;
+    rate: number;
+};
+
+export type CalendarExpensesSubGroupType = {
+    category: string;
+    subcategories: {
+        subcategory: string;
+        rate: number;
+    }[];
+};
+
+export type CalendarExpensesGroupType = {
+    category: CalendarExpensesCategoryType[];
+    sub_category: CalendarExpensesSubGroupType[];
 }
