@@ -117,17 +117,17 @@ export default function RecordsDialog({id, name, image, page}: IconsProps) {
                                 </h2>
                                 <div className="ml-4 flex flex-col items-start">
                                     <Link
-                                        href="/"
+                                        href={paths.recordsListsPageUrl()}
                                         className="hover:underline hover:underline-offset-4 text-base font-[500] mb-2"
                                     >
                                         Records
                                     </Link>
-                                    <Link
+                                    {/* <Link
                                         href="/"
                                         className="hover:underline hover:underline-offset-4 text-base font-[500] mb-2"
                                     >
                                         Database
-                                    </Link>
+                                    </Link> */}
                                 </div>
                             </div>
                         </div>

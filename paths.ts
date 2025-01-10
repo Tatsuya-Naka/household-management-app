@@ -89,6 +89,15 @@ const paths = {
     recordsSavingsUrl() {
         return "/records/savings";
     },
+    recordsListsPageUrl() {
+        return "/records/lists";
+    },
+    recordsListsAppliedPageUrl() {
+        return "/records/lists/applied";
+    },
+    recordsListsProcessingPageUrl() {
+        return "/records/lists/processing";
+    }
 }
 
 export default paths;
