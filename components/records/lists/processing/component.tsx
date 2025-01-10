@@ -4,19 +4,19 @@ import { GiJapan } from "react-icons/gi";
 import { MdSort } from "react-icons/md";
 import { TbLineDotted } from "react-icons/tb";
 import Link from "next/link";
-import { getRecordsAppliedData } from "@/data/records";
+import { getRecordsProcessingData } from "@/data/records";
 import { MdOutlineNavigateNext } from "react-icons/md";
 import { MdOutlineArrowBackIosNew } from "react-icons/md";
 import paths from "@/paths";
-import RecordBox from "./record-box";
+import RecordBox from "../applied/record-box";
 
-interface RecordsAppliedHomeProps {
+interface RecordsProcessingHomeProps {
     search: string;
     page: number;
 }
 
-export default async function RecordsAppliedComponent({ search, page }: RecordsAppliedHomeProps) {
-    const records = await getRecordsAppliedData(search, page);
+export default async function RecordsProcessingComponent({ search, page }: RecordsProcessingHomeProps) {
+    const records = await getRecordsProcessingData(search, page);
 
     return (
         <div className="min-h-[calc(100vh-180px)] pt-10 px-5">
@@ -81,7 +81,7 @@ export default async function RecordsAppliedComponent({ search, page }: RecordsA
                         {(page !== 1 && page + 3 <= records.count) &&
                             <div className="flex items-center gap-3 ">
                                 <Link className="bg-white/50 w-8 text-base text-slate-800 hover:bg-gray-300/30 text-center border-2 border-solid border-slate-800 rounded-md shadow-md p-1"
-                                    href={`${paths.recordsListsAppliedPageUrl()}?search=${search}&page=1`}
+                                    href={`${paths.recordsListsProcessingPageUrl()}?search=${search}&page=1`}
                                 >
                                     {1}
                                 </Link>
@@ -94,26 +94,26 @@ export default async function RecordsAppliedComponent({ search, page }: RecordsA
                         }
                         {(page + 3 > records.count && page != 1) &&
                             <Link className="bg-white/50 w-8 text-base text-slate-800 hover:bg-gray-300/30 text-center border-2 border-solid border-slate-800 rounded-md shadow-md p-1"
-                                href={`${paths.recordsListsAppliedPageUrl()}?search=${search}&page=1`}
+                                href={`${paths.recordsListsProcessingPageUrl()}?search=${search}&page=1`}
                             >
                                 {1}
                             </Link>
                         }
                         <Link className="bg-slate-800 text-white w-8 text-base hover:bg-slate-800/50 text-center border-2 border-solid border-slate-800 hover:border-slate-800/50 rounded-md shadow-md p-1"
-                            href={`${paths.recordsListsAppliedPageUrl()}?search=${search}&page=${page}`}
+                            href={`${paths.recordsListsProcessingPageUrl()}?search=${search}&page=${page}`}
                         >
                             {page}
                         </Link>
                         {page + 1 <= records.count &&
                             <Link className="bg-white/50 w-8 text-base text-slate-800 hover:bg-gray-300/30 text-center border-2 border-solid border-slate-800 rounded-md shadow-md p-1"
-                                href={`${paths.recordsListsAppliedPageUrl()}?search=${search}&page=${page + 1}`}
+                                href={`${paths.recordsListsProcessingPageUrl()}?search=${search}&page=${page + 1}`}
                             >
                                 {page + 1}
                             </Link>
                         }
                         {page + 2 <= records.count &&
                             <Link className="bg-white/50 w-8 text-base text-slate-800 hover:bg-gray-300/30 text-center border-2 border-solid border-slate-800 rounded-md shadow-md p-1"
-                                href={`${paths.recordsListsAppliedPageUrl()}?search=${search}&page=${page + 2}`}
+                                href={`${paths.recordsListsProcessingPageUrl()}?search=${search}&page=${page + 2}`}
                             >
                                 {page + 2}
                             </Link>
@@ -138,7 +138,7 @@ export default async function RecordsAppliedComponent({ search, page }: RecordsA
                         {(1 < page && page <= records.count) &&
                             <Link className={`bg-gray-500/50 rounded-full px-3 py-2 text-base flex items-center text-slate-800 font-[600]
                         group hover:bg-gray-500/30 transition-all delay-75 ease-in`}
-                                href={`${paths.recordsListsAppliedPageUrl()}?search=${search}&page=${page - 1}`}
+                                href={`${paths.recordsListsProcessingPageUrl()}?search=${search}&page=${page - 1}`}
                             >
                                 <MdOutlineArrowBackIosNew size={12} className="fill-slate-800 group-hover:fill-slate-800/50 mr-2 transition" />
                                 <span className="text-slate-800 transition group-hover:text-slate-800/50 text-sm">Back</span>
@@ -148,7 +148,7 @@ export default async function RecordsAppliedComponent({ search, page }: RecordsA
                         {page < records.count &&
                             <Link className={`bg-gray-500/50 rounded-full px-3 py-2 text-base flex items-center text-slate-800 font-[600]
                         group hover:bg-gray-500/30 transition-all delay-75 ease-in`}
-                                href={`${paths.recordsListsAppliedPageUrl()}?search=${search}&page=${page + 1}`}
+                                href={`${paths.recordsListsProcessingPageUrl()}?search=${search}&page=${page + 1}`}
                             >
                                 <span className="text-slate-800 transition group-hover:text-slate-800/50 text-sm mr-2">Next</span>
                                 <MdOutlineNavigateNext size={12} className="fill-slate-800 group-hover:fill-slate-800/50 transition" />

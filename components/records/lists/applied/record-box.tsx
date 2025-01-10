@@ -25,7 +25,9 @@ export default function RecordBox({ data }: RecordBoxProps) {
                         </div>
                     </div>
 
-                    <IoMdCheckboxOutline size={32} className="fill-emerald-500" />
+                    {data.income_status === "paid" &&
+                        <IoMdCheckboxOutline size={32} className="fill-emerald-500" />
+                    }
                 </div>
 
                 {/* Content */}
