@@ -68,7 +68,7 @@ export default async function RecordsAppliedComponent({ search, page }: RecordsA
                 {/* Grid records */}
                 <div className="min-h-[calc(100vh-340px)] grid grid-cols-4 gap-4">
 
-                    {/* Income */}
+                    {/* Income & Expenses */}
                     {(records.data && records.data.length > 0) && records.data.map((record, key) => (
                         <RecordBox key={key} data={record} />
                     ))}

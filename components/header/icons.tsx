@@ -22,8 +22,7 @@ export interface IconsProps {
 export default function Icons({ id, name, image }: IconsProps) {
     const [brightness, setBrightness] = useState(true);
     const [isProfile, setIsProfile] = useState(false);
-    console.log("id: ", id);
-    console.log("Username: ", name);
+    console.log({userId: id, name: name})
 
     return (
         <div className='flex items-center justify-end'>

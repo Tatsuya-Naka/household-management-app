@@ -157,4 +157,49 @@ export const getRecordsProcessingData = async (search: string, page: number) => 
             }
         }
     }
+};
+
+export const getRecordData = async ({recordId, userId}: {recordId: string, userId: string | undefined}) => {
+    try {
+
+        if (!userId) return {message: "Invalid Access"};
+
+        const record = await db.record.findUnique({
+            where: {
+                id: recordId,
+                userId,
+            },
+            select: {
+                id: true,
+                // userId: true,
+                type: {select: {name: true}},
+                currency: {select: {name: true}}, country: {select: {name: true}},
+                dateString: true, comment: true,
+                income_status: true,
+                incomeresource: {select: {name: true}}, incomecategory: {select: {name: true}},
+                regular_num: true, regular_unit: true,
+                income_amount: true,
+                Items: {select: {id: true, item: true, category: {select: {name: true}}, subcategory: {select: {name: true}}, amount: true, cost: true, }},
+                genre: true,
+                payment_method: true,
+                object: true,
+            }
+        });
+
+        return {
+            message: "Success",
+            record,
+        };
+
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            return {
+                message: err.message,
+            }
+        } else {
+            return {
+                message: "Something Wrong"
+            }
+        }
+    }
 }

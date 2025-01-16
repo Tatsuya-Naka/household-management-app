@@ -75,10 +75,7 @@ const paths = {
         return "/server/records/savings";
     },
     recordEditPageUrl() {
-        return "/records/income/edit";
-    },
-    recordExpensesEditPage() {
-        return "/records/expenses/edit";
+        return "/edit/records";
     },
     recordsIncomeUrl() {
         return "/records/income";

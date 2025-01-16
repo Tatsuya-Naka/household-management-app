@@ -31,7 +31,6 @@ export const privateRoutes = [
     paths.recordsIncomeUrl(),
     paths.recordsExpensesUrl(),
     paths.recordsSavingsUrl(),
-    paths.recordExpensesEditPage(),
     paths.recordsListsPageUrl(),
     paths.recordsListsAppliedPageUrl(),
     paths.recordsListsProcessingPageUrl(),

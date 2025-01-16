@@ -171,7 +171,7 @@ export default function RecordsExpenses({ session }: RecordsIncomeProps) {
                         }),
                         date: record.dateCalendar,
                         currencyType: record.currency.name,
-                        url: `${paths.recordExpensesEditPage()}/${record.id}`,
+                        url: `${paths.recordEditPageUrl()}/${record.id}`,
                         totalcost: record.totalcost,
                     })
                 }), total: result.current.reduce((sum: number, record: RecordEditCurrentType) => sum += ((record.totalcost * 100) | 0), 0) / 100

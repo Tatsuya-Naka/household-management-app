@@ -6,6 +6,7 @@ import Link from "next/link";
 import { RecordsListsType } from "@/type/records";
 import { generateDateFormat } from "@/data/date";
 import dayjs from "dayjs";
+import paths from "@/paths";
 
 interface RecordBoxProps {
     data: RecordsListsType;
@@ -59,7 +60,7 @@ export default function RecordBox({ data }: RecordBoxProps) {
 
                         {/* TODO: Edit Page  */}
                         <Link
-                            href="#"
+                            href={`${paths.recordEditPageUrl()}/${data.id}`}
                             className="group ml-2"
                         >
                             <TiPencil size={32} className="group-hover:fill-orange-800/50 transition delay-75 ease-in" />

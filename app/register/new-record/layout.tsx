@@ -6,7 +6,7 @@ import { SessionProvider } from "next-auth/react";
 export default function NewRecordPageLayout({ children }: { children: React.ReactNode }) {
     return (
         <div className="max-w-full">
-            <header className="w-full px-5 py-3 h-[180px] bg-gradient-to-b from-sky-400 via-teal-200 to-emerald-400">
+            <header className="w-full px-5 py-3 h-[180px] bg-gradient-to-b from-sky-400 via-teal-200 to-emerald-400 mx-auto">
                 <div className='max-w-[1560px] relative z-[80] mx-auto h-full'>
                     <SessionProvider>
                         <RecordsDialogForRegister page="new-record" />

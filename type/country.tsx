@@ -1,0 +1,1 @@
+export const countries = ["Australia", "Japan", "US", "Europe"];
