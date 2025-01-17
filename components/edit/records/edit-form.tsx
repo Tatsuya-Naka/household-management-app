@@ -7,12 +7,13 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider/LocalizationProvider";
 import dayjs, { Dayjs } from "dayjs";
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import { GoTriangleDown } from "react-icons/go";
 import { BsTrash } from "react-icons/bs";
 import { MdOutlineAdd } from "react-icons/md";
 import { v4 as uuid } from "uuid";
 import EditRecordImage from "../record-image";
+import * as actions from "@/app/actions";
 
 interface EditRecordsFormProps {
     record: EditRecordType | undefined | null;
@@ -29,6 +30,11 @@ export default function EditRecordsForm({ record }: EditRecordsFormProps) {
     const [regular, setRegular] = useState<{ unit: string | null | undefined, num: number | null | undefined }>({ unit: record?.regular_unit, num: record?.regular_num });
     const [payment, setPayment] = useState<string | null | undefined>(record?.payment_method);
     // TODO: save the record editted using useActionForm
+    const [appliedFormState, appliedAction] = useActionState(actions.appliedToRecords.bind(null, {
+        type: record?.type.name, currency: currency.name, country: country.name, date: date, regular_unit: regular.unit, items, recordId: record?.id, payment,
+        status: incomeStatus.cat,
+    }), { errors: {} });
+    const [savedFormState, savedAction] = useActionState(actions.savedToRecords, { errors: {} });
 
     const handleDateChange = (newDate: Dayjs) => {
         setDate(newDate.toDate());
@@ -438,6 +444,9 @@ export default function EditRecordsForm({ record }: EditRecordsFormProps) {
                                             // disabled={isSubmitting}
                                             name='item'
                                             defaultValue={item.item}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setItems((prev) => prev.map((prevItem) =>
+                                                prevItem.id === item.id ? { ...prevItem, item: e.target.value } : prevItem,
+                                            ))}
                                             // className={`w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1 ${errors.items?.[index]?.item ? "bg-red-500/30" : "bg-white"}`}
                                             className={`w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1 bg-white`}
                                         />
@@ -446,6 +455,9 @@ export default function EditRecordsForm({ record }: EditRecordsFormProps) {
                                             type="text"
                                             name="category"
                                             defaultValue={item.category.name}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setItems((prev) => prev.map((prevItem) =>
+                                                prevItem.id === item.id ? { ...prevItem, category: { name: e.target.value } } : prevItem,
+                                            ))}
                                             // disabled={isSubmitting}
                                             // className={`w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1 ${errors.items?.[index]?.category ? "bg-red-500/30" : "bg-white"}`}
                                             className={`w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1 bg-white`}
@@ -453,7 +465,10 @@ export default function EditRecordsForm({ record }: EditRecordsFormProps) {
                                         <input
                                             type="text"
                                             name="sub_category"
-                                            defaultValue={item.subcategory?.name}                                            
+                                            defaultValue={item.subcategory?.name}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setItems((prev) => prev.map((prevItem) =>
+                                                prevItem.id === item.id ? { ...prevItem, subcategory: { name: e.target.value } } : prevItem,
+                                            ))}
                                             // disabled={isSubmitting}                                           
                                             // className={`w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1 ${errors.items?.[index]?.subcategory ? "bg-red-500/30" : "bg-white"}`}
                                             className={`w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1 bg-white`}
@@ -461,7 +476,10 @@ export default function EditRecordsForm({ record }: EditRecordsFormProps) {
                                         <input
                                             type="number"
                                             name="amount"
-                                            defaultValue={item.amount}                                            
+                                            defaultValue={item.amount}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setItems((prev) => prev.map((prevItem) => 
+                                                prevItem.id === item.id ? {...prevItem, amount: Number(e.target.value)} : prevItem,
+                                            ))}
                                             // disabled={isSubmitting}                                            
                                             // className={`w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1 ${errors.items?.[index]?.amount ? "bg-red-500/30" : "bg-white"}`}
                                             className={`w-full outline-none border-2 border-gray-500/50 border-solid rounded-lg px-2 py-1 bg-white`}
@@ -474,8 +492,11 @@ export default function EditRecordsForm({ record }: EditRecordsFormProps) {
                                             <input
                                                 type="number"
                                                 name="cost"
-                                                defaultValue={item.cost}                                            
+                                                defaultValue={item.cost}
                                                 step={0.01}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setItems((prev) => prev.map((prevItem) => 
+                                                    prevItem.id === item.id ? {...prevItem, cost: Number(e.target.value)} : prevItem,
+                                                ))}
                                                 // disabled={isSubmitting}
                                                 // onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeRow(row.id, "cost", e.target.value)}
                                                 className="w-full outline-none"
@@ -622,14 +643,27 @@ export default function EditRecordsForm({ record }: EditRecordsFormProps) {
                     </div>
                 }
 
-                <button
-                    type="submit"
-                    // className={`w-full rounded-lg px-3 py-2 ${isSubmitting ? "bg-orange-400/50" : "bg-orange-400 hover:bg-orange-400/50"} text-white font-[700]`}
-                    className={`w-full rounded-lg px-3 py-2 bg-orange-400 hover:bg-orange-400/50 text-white font-[700]`}
-                // disabled={isSubmitting}
-                >
-                    Save
-                </button>
+                <div className="flex items-center w-full gap-2">
+                    <button
+                        type="submit"
+                        formAction={appliedAction}
+                        // className={`w-full rounded-lg px-3 py-2 ${isSubmitting ? "bg-orange-400/50" : "bg-orange-400 hover:bg-orange-400/50"} text-white font-[700]`}
+                        className={`w-full rounded-lg px-3 py-2 bg-red-600 hover:bg-red-600/50 text-white font-[700]`}
+                    // disabled={isSubmitting}
+                    >
+                        Applied
+                    </button>
+                    <button
+                        type="submit"
+                        formAction={savedAction}
+                        // className={`w-full rounded-lg px-3 py-2 ${isSubmitting ? "bg-orange-400/50" : "bg-orange-400 hover:bg-orange-400/50"} text-white font-[700]`}
+                        className={`w-full rounded-lg px-3 py-2 bg-gray-400 hover:bg-gray-400/50 text-white font-[700]`}
+                    // disabled={isSubmitting}
+                    >
+                        Save
+                    </button>
+
+                </div>
             </div>
         </form>
     )
