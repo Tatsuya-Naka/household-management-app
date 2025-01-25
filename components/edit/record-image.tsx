@@ -6,21 +6,51 @@ import { useState } from "react";
 
 interface EditRecordImageProps {
     object: string | null | undefined;
+    setImageCondition: (condition: {isStored: boolean, isDeleted: boolean}) => void;
 };
 
-export default function EditRecordImage({ object }: EditRecordImageProps) {
-    const [image, setImage] = useState<string | null | undefined>(object)
+
+export default function EditRecordImage({ object, setImageCondition }: EditRecordImageProps) {
+    const [image, setImage] = useState<string | null | undefined>(object ? `${object}?noCache=${Date.now()}`: "");
+    const [imageStored, setImageStored] = useState<boolean>(false);
+    const imageId = object?.split("/").pop();
 
     const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
-        // TODO: Add image into the temp AWS S3 bucket then, read it.
-        // If saved, move the image into the permanet AWS S3 bucket. 
-        // If not leave it (set the bucket rule in s3 to discard it within one hour)
+
+        const files = e.currentTarget.files;
+        if (files && files.length > 0 && files[0] && imageId) {
+            const formData = new FormData();
+            formData.append("file", files[0]);
+            formData.append("imageId", imageId);
+
+            const response = await fetch("/register/api/new-record/image", {
+                method: "POST",
+                body: formData,
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                console.log(result.message);
+            }
+
+            setImage(`${result.url}?noCache=${Date.now()}`);
+            setImageStored(true);
+            setImageCondition({isStored: true, isDeleted: false});
+        }
     }
 
-    const handleRemoveImage = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleRemoveImage = async(e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         setImage(null);
+        if (!imageStored) return;
+        const response = await fetch("/server/new-record/cancel", {
+            method: "POST",
+            body: JSON.stringify({imageId: imageId}),
+        });
+        if (response.ok) {
+            setImageStored(false);
+            setImageCondition({isStored: false, isDeleted: true});
+        }
     }
 
     return (

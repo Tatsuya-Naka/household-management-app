@@ -7,18 +7,17 @@ import LogInForm from '@/components/auth/login-form';
 
 export default async function LoginPage() {
     return (
-        <div className="max-w-screen-xl lg:mx-auto md:mx-5 mx-0 my-0 flex flex-col items-center justify-center min-h-[calc(100vh-56px)]">
-            <div className='flex items-center justify-center'>
-
+        <div className="max-w-screen-xl mx-auto px-4 flex flex-col items-center justify-center min-h-[calc(100vh-56px)]">
+            <div className='flex flex-col sm:flex-row items-center justify-center gap-6'>
                 <Image
                     src={Hima}
                     alt='Hima'
                     height={2000}
                     width={2000}
-                    className='lg:w-[380px] sm:w-[250px] sm:inline-block hidden shrink-0'
+                    className='w-[200px] sm:w-[250px] lg:w-[380px] hidden sm:block shrink-0'
+                    priority
                 />
 
-                {/* Login form */}
                 <LogInForm />
 
                 <Image
@@ -26,7 +25,8 @@ export default async function LoginPage() {
                     alt='Shinchan'
                     height={2000}
                     width={2000}
-                    className='lg:w-[380px] sm:w-[250px] sm:inline-block hidden shrink-0'
+                    className='w-[200px] sm:w-[250px] lg:w-[380px] hidden sm:block shrink-0'
+                    priority
                 />
             </div>
 

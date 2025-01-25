@@ -59,7 +59,7 @@ export default function LogInFormStatus({formState}: LoginFormStatusProps) {
             <div className="">
                 <Link
                     href={paths.resetPasswordUrl()}
-                    className="text-base text-slate-800 hover:underline underline-offset-4 cursor-pointer"
+                    className={`text-base text-slate-800 hover:underline underline-offset-4 ${pending ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
                 >
                     Forget password?
                 </Link>
