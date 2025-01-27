@@ -3,26 +3,29 @@ import Image from "next/image";
 import { IoReceiptOutline } from "react-icons/io5";
 import { IoIosRemove } from "react-icons/io";
 import { useState } from "react";
+import { v4 as uuid } from "uuid";
 
 interface EditRecordImageProps {
     object: string | null | undefined;
-    setImageCondition: (condition: {isStored: boolean, isDeleted: boolean}) => void;
+    setImageCondition: (condition: {isStored: boolean, isDeleted: boolean, imageUrl: string}) => void;
 };
 
 
 export default function EditRecordImage({ object, setImageCondition }: EditRecordImageProps) {
     const [image, setImage] = useState<string | null | undefined>(object ? `${object}?noCache=${Date.now()}`: "");
     const [imageStored, setImageStored] = useState<boolean>(false);
-    const imageId = object?.split("/").pop();
-
+    const imageId = object?.split("/").pop() || uuid();
+    
     const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
 
         const files = e.currentTarget.files;
+        console.log({imageId: imageId});
         if (files && files.length > 0 && files[0] && imageId) {
             const formData = new FormData();
             formData.append("file", files[0]);
             formData.append("imageId", imageId);
+            console.log({formData: formData});
 
             const response = await fetch("/register/api/new-record/image", {
                 method: "POST",
@@ -32,24 +35,29 @@ export default function EditRecordImage({ object, setImageCondition }: EditRecor
             if (!response.ok) {
                 console.log(result.message);
             }
+            console.log({imageId: imageId});
+            console.log({result_url: result.url});
 
             setImage(`${result.url}?noCache=${Date.now()}`);
             setImageStored(true);
-            setImageCondition({isStored: true, isDeleted: false});
+            setImageCondition({isStored: true, isDeleted: false, imageUrl: result.url});
         }
     }
 
     const handleRemoveImage = async(e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         setImage(null);
-        if (!imageStored) return;
+        if (!imageStored) {
+            setImageCondition({isStored: false, isDeleted: true, imageUrl: ""});
+            return;
+        }
         const response = await fetch("/server/new-record/cancel", {
             method: "POST",
             body: JSON.stringify({imageId: imageId}),
         });
         if (response.ok) {
             setImageStored(false);
-            setImageCondition({isStored: false, isDeleted: true});
+            setImageCondition({isStored: false, isDeleted: true, imageUrl: ""});
         }
     }
 

@@ -2,6 +2,8 @@
 
 import { auth } from "@/auth";
 import { generateDateFormat } from "@/data/date";
+import { imageDelete } from "@/data/image-delete";
+import { sqsSendReceiveMessage } from "@/data/sendReceiveMessage";
 import { db } from "@/lib/db";
 import paths from "@/paths";
 import { EditExpensesSchema, EditIncomeSchema } from "@/schemas/new-record";
@@ -31,7 +33,7 @@ interface RecordsProps {
   payment: string | null | undefined;
   status: string;
   isSubmitted: boolean;
-  imageCondition: {isStored: boolean, isDeleted: boolean};
+  imageCondition: { isStored: boolean, isDeleted: boolean, imageUrl: string };
 }
 export async function appliedToRecords({ type, currency, country, date, regular_unit, items, recordId, payment, status, isSubmitted, imageCondition }: RecordsProps, formState: RecordsState, formData: FormData): Promise<RecordsState> {
   "use server";
@@ -47,6 +49,28 @@ export async function appliedToRecords({ type, currency, country, date, regular_
   // TODO: trigger sqs queue based on imageCondition
   // if imageCondition.isStored, update image object on s3
   // else if imageCondition.isDelete delete image object on s3
+  if (imageCondition.isStored) {
+    // TODO: update image object on s3 with sqs
+    const formState = await sqsSendReceiveMessage(imageCondition.imageUrl);
+    if (formState.success && formState.success.url) {
+      const imageUrl = formState.success.url;
+      await db.record.update({
+        where: { id: recordId },
+        data: { object: imageUrl }
+      });
+    }
+  } else if (imageCondition.isDeleted) {
+    // TODO: delete image object on s3 and update record
+    const response = await imageDelete(recordId);
+    if (response.success) {
+      await db.record.update({
+        where: { id: recordId },
+        data: { object: null }
+      });
+    }
+  }
+
+  console.log({ imageCondition: imageCondition });
 
   if (type === "expenses") {
     const validateFields = EditExpensesSchema.safeParse({
@@ -181,7 +205,7 @@ export async function appliedToRecords({ type, currency, country, date, regular_
     }
     revalidatePath(paths.recordsListsProcessingPageUrl());
     redirect(paths.recordsListsProcessingPageUrl());
-    
+
     return { errors: {} };
 
   } else if (type === "income") { // income

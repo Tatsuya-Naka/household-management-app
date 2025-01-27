@@ -31,12 +31,15 @@ export default function EditRecordsForm({ record }: EditRecordsFormProps) {
     const [regular, setRegular] = useState<{ unit: string | null | undefined, num: number | null | undefined }>({ unit: record?.regular_unit, num: record?.regular_num });
     const [payment, setPayment] = useState<string | null | undefined>(record?.payment_method);
     const [isSubmitted, setIsSubmitted] = useState<{ isApplied: boolean, isSaved: boolean }>({ isApplied: false, isSaved: false });
-    const [imageCondition, setImageCondition] = useState<{isStored: boolean, isDeleted: boolean}>({isStored: false, isDeleted: false});
+    const [imageCondition, setImageCondition] = useState<{isStored: boolean, isDeleted: boolean, imageUrl: string}>({isStored: false, isDeleted: false, imageUrl: ""});
     // TODO: save the record editted using useActionForm
     const [formState, action] = useActionState(actions.appliedToRecords.bind(null, {
         type: record?.type.name, currency: currency.name, country: country.name, date: date, regular_unit: regular.unit, items, recordId: record?.id, payment,
         status: incomeStatus.cat, isSubmitted: isSubmitted.isApplied, imageCondition,
     }), { errors: {} });
+
+    // TODO: used for error handling but because of the build just write this
+    console.log({formState: formState});
 
     const handleDateChange = (newDate: Dayjs) => {
         setDate(newDate.toDate());
