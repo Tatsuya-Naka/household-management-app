@@ -31,3 +31,5 @@ export const getIcons = (name: string) => {
 
 export const currencies = ["AUD", "JPY", "USD", "EUR"];
 
+export const futureCurrencies = ["AUD", "JPY", "USD", "EUR", "CAD", "CHF", "CNY", "HKD", "KRW", "MXN", "NZD", "SGD", "GBP"]
+

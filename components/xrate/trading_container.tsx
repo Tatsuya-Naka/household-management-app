@@ -5,6 +5,7 @@ import XRateCard from "./xrate_card";
 import ArrowContainer from "./arrow_container";
 import { getXRate } from "@/app/server/xrate/xrate";
 import { XRateType } from "@/type/xrate";
+import xrateCalc from "./xrate_calc";
 
 interface TradingContainerProps {
   currencyType: string;
@@ -15,8 +16,8 @@ export default function TradingContainer({ currencyType, to }: TradingContainerP
   // TODO: get trading data from database
   const [trading, setTreading] = useState<XRateType[]>();
   const [arrowChange, setArrowChange] = useState(false);
-  const [today, setToday] = useState<{from: number, to: number}>();
-  const [value, setValue] = useState<{from: number, to: number}>();
+  const [today, setToday] = useState<{from: number, to: number}>({from: 1, to: 1});
+  const [value, setValue] = useState<{from: number, to: number}>({from: 1, to: 1});
 
   useEffect(() => {
     (async () => {
@@ -37,7 +38,8 @@ export default function TradingContainer({ currencyType, to }: TradingContainerP
   const handleSubmitFrom = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const value = formData.get("num");
+    const num = Number(formData.get("num"));
+    setValue((prev) => ({...prev, from: num, to: Math.round((xrateCalc(today.from, today.to) * num) * 100) / 100}))
   }
 
   const handleSubmitTo = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -46,13 +48,9 @@ export default function TradingContainer({ currencyType, to }: TradingContainerP
     const value = formData.get("num");
   }
 
-  const handleArrowClick = () => {
-    setArrowChange((prev) => !prev);
-  }
-
   useEffect(() => {
     if (today) {
-      setValue({from: 1, to: (Math.round((Math.round(today.to * 100) / 100) / ((Math.round(today.from * 100) / 100)) * 100)) / 100});
+      setValue({from: 1, to: xrateCalc(today.from, today.to)});
     }
   }, [today]);
 
@@ -61,9 +59,9 @@ export default function TradingContainer({ currencyType, to }: TradingContainerP
       {/* trading1 */}
       <XRateCard currencyType={currencyType} onSubmit={handleSubmitFrom} defaultValue={value?.from} />
       {/* Arrow */}
-      <ArrowContainer onClick={handleArrowClick} arrow={arrowChange} />
+      <ArrowContainer />
       {/* trading2 */}
-      <XRateCard currencyType={to} onSubmit={handleSubmitTo} defaultValue={value?.to} />
+      <XRateCard currencyType={to} onSubmit={handleSubmitTo} defaultValue={value?.to} notTextAllowed={true} />
     </div>
   )
 }
