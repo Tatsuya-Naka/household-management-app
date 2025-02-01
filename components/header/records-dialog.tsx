@@ -53,7 +53,7 @@ export default function RecordsDialog({id, name, image, page}: IconsProps) {
                         </li>
                         <li className='mr-5' onMouseEnter={() => setMounse(false)}>
                             <Link
-                                href={paths.communityPageUrl()}
+                                href={paths.xrate()}
                                 className={`${page==="xrate" ? "bg-white/50" : "bg-transparent hover:underline hover:underline-offset-4"} text-xl text-slate-800 font-[700] px-2 py-1 rounded-md cursor-pointer`}
                             >
                                 X-Rates

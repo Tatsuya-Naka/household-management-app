@@ -503,14 +503,14 @@ export default function DashboardContainer() {
             })
     }, [isFetched, from, to]);
 
-    useEffect(() => {
-        console.log({ expense: expense });
-        console.log({ compExpense: compExpense });
-        console.log({ session: session?.user });
-        console.log({ income: income });
-        console.log({ compIncome: compIncome });
-        console.log({ saving: saving });
-    }, [expense, compExpense, session, income, compIncome, saving]);
+    // useEffect(() => {
+    //     console.log({ expense: expense });
+    //     console.log({ compExpense: compExpense });
+    //     console.log({ session: session?.user });
+    //     console.log({ income: income });
+    //     console.log({ compIncome: compIncome });
+    //     console.log({ saving: saving });
+    // }, [expense, compExpense, session, income, compIncome, saving]);
 
     // CustomToolTip
     const CustomeToolTip = (({ payload }: CustomTooltipProps) => {
