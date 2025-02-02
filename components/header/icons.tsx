@@ -46,14 +46,14 @@ export default function Icons({ image}: IconsProps) {
                 {image ?
                     <button
                         type="button"
-                        className="rounded-full bg-white p-2"
+                        className="rounded-full flex items-center justify-center ml-2"
                         onClick={() => setIsProfile((prev) => !prev)}
                     >
                         <Image
                             src={image}
                             alt="Avatar"
-                            width={24}
-                            height={24}
+                            width={40}
+                            height={40}
                             className='rounded-full'
                         />
                     </button>
