@@ -20,7 +20,7 @@ export default async function SettingPage() {
       </div>
 
       {/* Component */}
-      <SettingComponent />
+      <SettingComponent session={session} />
     </div>
   )
 }
