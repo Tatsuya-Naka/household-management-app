@@ -20,12 +20,11 @@ export default function EditRecordImage({ object, setImageCondition }: EditRecor
         e.preventDefault();
 
         const files = e.currentTarget.files;
-        console.log({imageId: imageId});
+
         if (files && files.length > 0 && files[0] && imageId) {
             const formData = new FormData();
             formData.append("file", files[0]);
             formData.append("imageId", imageId);
-            console.log({formData: formData});
 
             const response = await fetch("/register/api/new-record/image", {
                 method: "POST",
@@ -35,8 +34,6 @@ export default function EditRecordImage({ object, setImageCondition }: EditRecor
             if (!response.ok) {
                 console.log(result.message);
             }
-            console.log({imageId: imageId});
-            console.log({result_url: result.url});
 
             setImage(`${result.url}?noCache=${Date.now()}`);
             setImageStored(true);

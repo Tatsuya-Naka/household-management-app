@@ -8,7 +8,7 @@ import Icons, { IconsProps } from '@/components/header/icons';
 import { GoGraph } from "react-icons/go";
 import { FiDatabase } from "react-icons/fi";
 
-export default function RecordsDialog({id, name, image, page}: IconsProps) {
+export default function RecordsDialog({image, page}: IconsProps) {
     const [mouse, setMounse] = useState(false);
 
     return (
@@ -78,7 +78,7 @@ export default function RecordsDialog({id, name, image, page}: IconsProps) {
                     </ul>
                 </div>
                 {/* notification, color change, setting, userIcon */}
-                <Icons id={id} name={name} image={image} />
+                <Icons image={image} />
             </div>
             {mouse &&
                 <div className="flex items-center justify-center w-full " onMouseEnter={() => setMounse(true)} onMouseLeave={() => setMounse(false)}>

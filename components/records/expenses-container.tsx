@@ -157,7 +157,6 @@ export default function RecordsExpenses({ session }: RecordsIncomeProps) {
             });
 
             const result = await response.json();
-            console.log()
             // Current Data setting
             setData({
                 isFetched: true, records: result.current.map((record: RecordEditCurrentType) => {
@@ -179,7 +178,6 @@ export default function RecordsExpenses({ session }: RecordsIncomeProps) {
 
             const { total: currentTotal, data: currentData }: { total: number, data: CalendarExpensesGraphType[] } = CalendarFixingExpensesRecords({ data: result.current, from: fixed.from, to: fixed.to });
             const { total: prevTotal, data: prevData }: { total: number, data: CalendarExpensesGraphType[] } = CalendarFixingExpensesRecords({ data: result.prev, from: fixed.prevFrom, to: fixed.prevTo });
-            console.log({currTotal: currentTotal})
             // Calc rate
             const calcRate = Number(((currentTotal - prevTotal) / prevTotal * 100).toFixed(2));
 
@@ -202,13 +200,6 @@ export default function RecordsExpenses({ session }: RecordsIncomeProps) {
         }
 
     }, [data, from, to]);
-
-    useEffect(() => {
-        console.log({ records: data.records });
-        console.log({ total: data.total });
-        console.log({ CalendarData: calendarData });
-        console.log({ rate: rate });
-    }, [data, calendarData, rate])
 
     return (
         <>
@@ -425,8 +416,8 @@ export default function RecordsExpenses({ session }: RecordsIncomeProps) {
                             <div className="absolute top-0 left-0 right-0">
                                 <div className="flex flex-col justify-start items-center gap-3">
                                     {(data.records && data.records.length > 0) &&
-                                        (data.records.map((record, key) => (
-                                            <RecordContainer key={key} recordId={record.id} currency={record.currencyType} content="expenses" genre={record.genre} items={record.items} amount={record.totalcost} editUrl={record.url} />
+                                        (data.records.map((record) => (
+                                            <RecordContainer key={record.id} currency={record.currencyType} content="expenses" genre={record.genre} items={record.items} amount={record.totalcost} editUrl={record.url} />
                                         )))
                                     }
                                 </div>

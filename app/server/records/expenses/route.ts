@@ -65,9 +65,6 @@ export async function POST(req: NextRequest) {
             }
         });
 
-        console.log({prev: prev});
-        console.log({current: current});
-
         return NextResponse.json({message: "Success", current, prev}, {status: 200});
 
     } catch (err: unknown) {

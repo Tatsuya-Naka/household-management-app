@@ -5,15 +5,18 @@ import { currencies, getIcons } from "@/type/currency";
 import { redirect } from "next/navigation";
 
 interface SelectCurrencyTypeProps {
-    current: string;
+    selected: string;
+    another: string;
+    params: string;
+    inputNum: number;
     setIsClicked: (isClicked: boolean) => void;
 }
-export default function SelectCurrencyType({ current, setIsClicked }: SelectCurrencyTypeProps) {
-    const options = currencies.filter(option => option != current);
+export default function SelectCurrencyType({ selected, another, inputNum, params, setIsClicked }: SelectCurrencyTypeProps) {
+    const options = currencies.filter(option => option != selected);
 
     const handleClick = (option: string) => {
         setIsClicked(false);
-        redirect(paths.xrate() + `?currencyType=${option}`);
+        redirect(paths.xrate() + `?${params}=${option}&${params === "to" ? "currencyType" : "to"}=${another}&inputNum=${inputNum}`);
     }
 
     return (

@@ -5,7 +5,6 @@ import { IoTrashBinOutline } from "react-icons/io5";
 import CurrencyIcon from "@/type/currency";
 
 interface RecordContainerProps {
-    recordId: string;
     currency: string;
     content: string;
     genre?: string;
@@ -13,13 +12,10 @@ interface RecordContainerProps {
     resource?: string;
     category?: string;
     amount: number;
-    image?: string;
     editUrl: string;
 }
 
-export default function RecordContainer({ recordId, currency, content, genre, items, resource, category, amount, image, editUrl }: RecordContainerProps) {
-    console.log({ recordId: recordId });
-    console.log({ image: image });
+export default function RecordContainer({ currency, content, genre, items, resource, category, amount, editUrl }: RecordContainerProps) {
     return (
         <div className="w-[560px] h-[240px] bg-white rounded-md shadow-md grid grid-cols-[240px_auto] shrink-0">
             <div className="w-full h-full">

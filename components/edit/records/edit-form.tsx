@@ -37,9 +37,9 @@ export default function EditRecordsForm({ record }: EditRecordsFormProps) {
         type: record?.type.name, currency: currency.name, country: country.name, date: date, regular_unit: regular.unit, items, recordId: record?.id, payment,
         status: incomeStatus.cat, isSubmitted: isSubmitted.isApplied, imageCondition,
     }), { errors: {} });
+    console.log({formState: formState});
 
     // TODO: used for error handling but because of the build just write this
-    console.log({formState: formState});
 
     const handleDateChange = (newDate: Dayjs) => {
         setDate(newDate.toDate());
@@ -71,14 +71,12 @@ export default function EditRecordsForm({ record }: EditRecordsFormProps) {
 
     const handleDeleteRow = (id: string) => {
         setItems((prev) => prev.filter((item) => item.id !== id));
-        console.log({ index: id });
     };
     // EditItemsType = {id: string, item: string, category: {name: string}, subcategory: {name: string} | null, amount: number, cost: number};
     const handleAddRow = () => {
         setItems((prev) => [...prev, {
             id: uuid(), item: "", category: { name: "" }, subcategory: { name: "" }, amount: 0, cost: 0
         }]);
-        console.log({ items: items });
     }
 
     return (

@@ -15,7 +15,6 @@ export default function CancelButton() {
         if (values.object) {
             try {
                 setPending(true);
-                console.log("Deleting...");
                 const response = await fetch(paths.newRecordCancelUrl(), {
                     method: "POST",
                     headers: {

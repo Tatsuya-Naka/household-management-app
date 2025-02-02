@@ -4,27 +4,25 @@ import { useEffect, useState } from "react";
 import XRateCard from "./xrate_card";
 import ArrowContainer from "./arrow_container";
 import { getXRate } from "@/app/server/xrate/xrate";
-import { XRateType } from "@/type/xrate";
 import xrateCalc from "./xrate_calc";
 
 interface TradingContainerProps {
   currencyType: string;
   to: string;
+  inputNum: number;
 }
 
-export default function TradingContainer({ currencyType, to }: TradingContainerProps) {
+export default function TradingContainer({ currencyType, to, inputNum }: TradingContainerProps) {
   // TODO: get trading data from database
-  const [trading, setTreading] = useState<XRateType[]>();
-  const [arrowChange, setArrowChange] = useState(false);
   const [today, setToday] = useState<{from: number, to: number}>({from: 1, to: 1});
   const [value, setValue] = useState<{from: number, to: number}>({from: 1, to: 1});
+  const [num, setNum] = useState<number>(inputNum);
 
   useEffect(() => {
     (async () => {
       try {
         const data = await getXRate(currencyType, to);
-        setTreading(data);
-        setToday({from: data[0].from, to: data[0].to});
+        setToday({from: data[data.length - 1].from, to: data[data.length - 1].to});
       } catch (err: unknown) {
         if (err instanceof Error) {
           console.log(err.message);
@@ -38,30 +36,25 @@ export default function TradingContainer({ currencyType, to }: TradingContainerP
   const handleSubmitFrom = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const num = Number(formData.get("num"));
-    setValue((prev) => ({...prev, from: num, to: Math.round((xrateCalc(today.from, today.to) * num) * 100) / 100}))
-  }
-
-  const handleSubmitTo = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const value = formData.get("num");
+    const input = Number(formData.get("num"));
+    setNum(input);
+    setValue((prev) => ({...prev, from: input, to: Math.round((xrateCalc(today.from, today.to) * input) * 100) / 100}))
   }
 
   useEffect(() => {
     if (today) {
-      setValue({from: 1, to: xrateCalc(today.from, today.to)});
+      setValue({from: inputNum, to: Math.round((xrateCalc(today.from, today.to) * inputNum) * 100) / 100});
     }
   }, [today]);
 
   return (
     <div className="flex items-center space-x-8 mx-auto w-full justify-center">
       {/* trading1 */}
-      <XRateCard currencyType={currencyType} onSubmit={handleSubmitFrom} defaultValue={value?.from} />
+      <XRateCard currencyType={currencyType} to={to} inputNum={num} onSubmit={handleSubmitFrom} defaultValue={value?.from} />
       {/* Arrow */}
       <ArrowContainer />
       {/* trading2 */}
-      <XRateCard currencyType={to} onSubmit={handleSubmitTo} defaultValue={value?.to} notTextAllowed={true} />
+      <XRateCard currencyType={currencyType} to={to} inputNum={num} defaultValue={value?.to} notTextAllowed={true} />
     </div>
   )
 }

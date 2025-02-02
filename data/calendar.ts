@@ -145,7 +145,6 @@ export function CalendarFixingSavingsRecords({ income, expenses, from, to }: Cal
             // console.log({record: record.Items});
             if (record.Items && record.Items.length > 0) {
                 for (let j = 0; j < record.Items.length; j++) {
-                    console.log({ item: record.Items[j] });
                     const category = record.Items[j].category.name;
                     const cost = record.Items[j].cost;
                     if (!(category in cateExp)) {
