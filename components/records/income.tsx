@@ -201,13 +201,6 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
 
     }, [data, from, to]);
 
-    useEffect(() => {
-        console.log({ records: data.records });
-        console.log({ total: data.total });
-        console.log({ CalendarData: calendarData });
-        console.log({ rate: rate });
-    }, [data, calendarData, rate])
-
     return (
         <>
             {/* Income & Rate by numbers */}
@@ -423,8 +416,8 @@ export default function RecordsIncome({ session }: RecordsIncomeProps) {
                             <div className="absolute top-0 left-0 right-0">
                                 <div className="flex flex-col justify-start items-center gap-3">
                                     {(data.records && data.records.length > 0) &&
-                                        (data.records.map((record, key) => (
-                                            <RecordContainer key={key} recordId={record.id} currency={record.currencyType} content="income" resource={record.resource} category={record.category} amount={record.amount} editUrl={record.url} />
+                                        (data.records.map((record) => (
+                                            <RecordContainer key={record.id} currency={record.currencyType} content="income" resource={record.resource} category={record.category} amount={record.amount} editUrl={record.url} />
                                         )))
                                     }
                                 </div>

@@ -10,17 +10,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({message: "Invalid Access"}, {status: 404});
     }
 
-    console.log({session: session});
-
     try {
         const body = await req.json();
         const { from, to, fromPrev, toPrev }: {from: bigint, to: bigint, fromPrev: bigint, toPrev: bigint} = body;        
-        // console.log({from: new Date(from)});
-        // console.log({to: new Date(to)});
-        // console.log({fromPrev: new Date(fromPrev)});
-        // console.log({toPrev: new Date(toPrev)});
-        
-        // TODO: Extract Data from database
+        // Extract Data from database
         const data = await db.record.findMany({
             select: {
                 currency: {
@@ -110,9 +103,6 @@ export async function POST(req: NextRequest) {
                 },
             }
         });
-
-        console.log({current: data});
-        console.log({prev: dataPrev});
 
         return NextResponse.json({message: "Success", current: data, prev: dataPrev, session: session}, {status: 200});
 

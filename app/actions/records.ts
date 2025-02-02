@@ -70,8 +70,6 @@ export async function appliedToRecords({ type, currency, country, date, regular_
     }
   }
 
-  console.log({ imageCondition: imageCondition });
-
   if (type === "expenses") {
     const validateFields = EditExpensesSchema.safeParse({
       date: date, currency: currency, genre: formData.get("genre"), country: country, items: items,
@@ -209,7 +207,6 @@ export async function appliedToRecords({ type, currency, country, date, regular_
     return { errors: {} };
 
   } else if (type === "income") { // income
-    console.log("Visit income")
     const validateFields = EditIncomeSchema.safeParse({
       date: date, currency: currency, resource: formData.get("resource"), country: country,
       comment: formData.get("comment"), regular_unit, regular_num: Number(formData.get("regular_num")),

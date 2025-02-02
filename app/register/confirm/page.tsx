@@ -75,7 +75,6 @@ export default function NewRecordConfirmPage() {
         if (values.object) {
             try {
                 setLeavePending(true);
-                console.log("Deleting...");
                 const response = await fetch(paths.newRecordCancelUrl(), {
                     method: "POST",
                     headers: {

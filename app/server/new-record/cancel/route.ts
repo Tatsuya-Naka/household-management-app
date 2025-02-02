@@ -7,7 +7,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
     "use server";
-    console.log("Post handler triggered!");
     try {
         const body = await req.json();
         const session = await auth();
@@ -24,7 +23,6 @@ export async function POST(req: NextRequest) {
         }
 
         if (!process.env.AUTH_AWSS3_BUCKET_TEMP && !process.env.AUTH_NEWRECORD_PATH) {
-            console.log("Missing Env variables");
             return NextResponse.json({message: "Internal Server Error"}, {status: 500});
         }
 

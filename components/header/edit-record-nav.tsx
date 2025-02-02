@@ -125,7 +125,7 @@ export default function EditRecordNav({ session, page }: EditRecordNav) {
                         </ul>
                     </div>
                     {/* notification, color change, setting, userIcon */}
-                    <Icons id={session?.user.id} name={session?.user.name} image={session?.user.image} />
+                    <Icons image={session?.user.image} />
                 </div>
                 {mouse &&
                     <div className="flex items-center justify-center w-full " onMouseEnter={() => setMouse(true)} onMouseLeave={() => setMouse(false)}>

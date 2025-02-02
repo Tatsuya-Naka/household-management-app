@@ -47,6 +47,9 @@ const paths = {
     newRecordPageUrl() {
         return "/register/new-record";
     },
+    xrate() {
+        return "/xrate";
+    },
     communityPageUrl() {
         return "/community";
     },

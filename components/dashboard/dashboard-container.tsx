@@ -187,9 +187,6 @@ export default function DashboardContainer() {
                 const end = (new Date(to)).setHours(0, 0, 0, 0) + 86400000 - 1;
                 const startPrev = (new Date(from)).setHours(0, 0, 0, 0) - duration - 86400000;
                 const endPrev = (new Date(to)).setHours(0, 0, 0, 0) - duration - 1;
-                // console.log({fromOrigin: from});
-                console.log({ milliseconds: (new Date(from)).setHours(0, 0, 0, 0) });
-                console.log({ from: new Date((new Date(from)).setHours(0, 0, 0, 0)) });
 
                 const response = await fetch(paths.dashboardFetchUrl(), {
                     method: "POST",
@@ -320,7 +317,6 @@ export default function DashboardContainer() {
                         return date1 - date2;
                     });
 
-                console.log({ current: currentExpense });
                 const scheduleCurrent: { [dateCalendar: string]: { totalCost: number, dayOfWeek: string } } = {};
                 const categoryCurrExpense: { [dateCalendar: string]: number } = {};
 
@@ -329,7 +325,6 @@ export default function DashboardContainer() {
                 }
 
                 let calcExpense = 0;
-                // console.log({ data: currentExpense[0].Items[0].cost });
                 for (let i = 0; i < currentExpense.length; i++) {
                     const data = currentExpense[i];
                     scheduleCurrent[data.dateCalendar].totalCost += data.totalcost;
@@ -363,9 +358,6 @@ export default function DashboardContainer() {
                 }));
 
                 setCategoryExp(cateCurrExpenseArray);
-
-                console.log({ curr: currExpenseArray });
-                console.log({ Category: cateCurrExpenseArray });
                 setExpense(currExpenseArray);
 
                 // Prev Expense data
@@ -415,8 +407,6 @@ export default function DashboardContainer() {
                     dayOfWeek: value.dayOfWeek,
                 }));
 
-                // console.log({prev: prevExpenseArray});
-
                 const compExpenseArray: forCompGraph[] = [];
                 for (let i = 0; i < currExpenseArray.length && i < prevExpenseArray.length; i++) {
                     const currData = currExpenseArray[i];
@@ -442,7 +432,6 @@ export default function DashboardContainer() {
                     totalSaving = Math.round(totalSaving * 100) / 100;
                     scheduleSaving[generateDateFormat(new Date(i))] = { totalSaving: totalSaving, dayOfWeek: dayjs(i).format("ddd") };
                 }
-                console.log({ scheduleSaving: scheduleSaving });
 
                 const currSavingArray = Object.entries(scheduleSaving).map(([dateCalendar, value]) => ({
                     dateCalendar,
@@ -502,15 +491,6 @@ export default function DashboardContainer() {
                 }
             })
     }, [isFetched, from, to]);
-
-    useEffect(() => {
-        console.log({ expense: expense });
-        console.log({ compExpense: compExpense });
-        console.log({ session: session?.user });
-        console.log({ income: income });
-        console.log({ compIncome: compIncome });
-        console.log({ saving: saving });
-    }, [expense, compExpense, session, income, compIncome, saving]);
 
     // CustomToolTip
     const CustomeToolTip = (({ payload }: CustomTooltipProps) => {

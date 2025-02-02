@@ -34,6 +34,7 @@ export const privateRoutes = [
     paths.recordsListsPageUrl(),
     paths.recordsListsAppliedPageUrl(),
     paths.recordsListsProcessingPageUrl(),
+    paths.xrate(),
 ]
 
 export const API_AUTH_PREFIX = paths.authPrefix();

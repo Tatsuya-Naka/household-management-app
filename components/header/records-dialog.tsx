@@ -8,7 +8,7 @@ import Icons, { IconsProps } from '@/components/header/icons';
 import { GoGraph } from "react-icons/go";
 import { FiDatabase } from "react-icons/fi";
 
-export default function RecordsDialog({id, name, image, page}: IconsProps) {
+export default function RecordsDialog({image, page}: IconsProps) {
     const [mouse, setMounse] = useState(false);
 
     return (
@@ -53,7 +53,7 @@ export default function RecordsDialog({id, name, image, page}: IconsProps) {
                         </li>
                         <li className='mr-5' onMouseEnter={() => setMounse(false)}>
                             <Link
-                                href={paths.communityPageUrl()}
+                                href={paths.xrate()}
                                 className={`${page==="xrate" ? "bg-white/50" : "bg-transparent hover:underline hover:underline-offset-4"} text-xl text-slate-800 font-[700] px-2 py-1 rounded-md cursor-pointer`}
                             >
                                 X-Rates
@@ -78,7 +78,7 @@ export default function RecordsDialog({id, name, image, page}: IconsProps) {
                     </ul>
                 </div>
                 {/* notification, color change, setting, userIcon */}
-                <Icons id={id} name={name} image={image} />
+                <Icons image={image} />
             </div>
             {mouse &&
                 <div className="flex items-center justify-center w-full " onMouseEnter={() => setMounse(true)} onMouseLeave={() => setMounse(false)}>
