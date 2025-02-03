@@ -13,7 +13,7 @@ export default async function SettingPage() {
   const session = await auth();
 
   return (
-    <div className="grid grid-cols-[180px_auto] mx-10 pt-16 gap-5 min-h-[calc(100vh-180px)]">
+    <div className="grid grid-cols-[180px_auto] mx-10 pt-16 gap-5">
       {/* List */}
       <div>
         <SettingList ListItems={ListItems} params={"profile"} />
