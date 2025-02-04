@@ -1,4 +1,3 @@
-import { auth } from "@/auth";
 import AccountCoponent from "@/components/setting/AccountCoponent";
 import SettingList from "@/components/setting/SettingLists";
 import paths from "@/paths";

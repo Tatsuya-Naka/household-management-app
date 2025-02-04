@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+// import { auth } from "@/auth";
 import FriendsComponent from "@/components/setting/FriendsComponent";
 import SettingList from "@/components/setting/SettingLists";
 import paths from "@/paths";
