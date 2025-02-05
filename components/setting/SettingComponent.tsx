@@ -18,8 +18,9 @@ export default function SettingComponent({ session }: SettingComponentProps) {
   // TODO: action to save the setting
   const [currency, setCurrency] = useState<{ type: string, isClicked: boolean }>({ type: session?.user.currency || "", isClicked: false })
   const [location, setLocation] = useState<{ name: string, isClicked: boolean }>({ name: session?.user.location || "", isClicked: false })
+  const [icon, setIcon] = useState<string | null>(session?.user.image || null);
   const [formState, action] = useActionState(actions.updateProfile.bind(null, {type: currency.type, local: location.name}), { errors: {} })
-  console.log(formState);
+  
   const handleCurrencyClick = () => {
     setCurrency({ ...currency, isClicked: !currency.isClicked })
   }
@@ -34,6 +35,46 @@ export default function SettingComponent({ session }: SettingComponentProps) {
 
   const handleLocationNameChange = (name: string) => {
     setLocation({ name, isClicked: false });
+  }
+
+  const handleImageShow = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.currentTarget.files;
+    if (files) {
+      const file = files[0];
+      const preview = (): Promise<string> => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const img = document.createElement("img");
+            img.onload = () => {
+              const canvas = document.createElement("canvas");
+              const size = Math.min(img.width, img.height);
+              canvas.width = size;
+              canvas.height = size;
+              const ctx = canvas.getContext("2d");
+              if (ctx) {
+                ctx.drawImage(
+                  img,
+                  (img.width - size) / 2,
+                  (img.height - size) / 2,
+                  size,
+                  size,
+                  0, 0,
+                  size,
+                  size
+                );
+                resolve(canvas.toDataURL());
+              }
+            };
+            img.src = reader.result as string;
+          }
+          reader.readAsDataURL(file);
+        })
+      }
+      preview().then((data) => {
+        setIcon(data);
+      });
+    }
   }
 
   return (
@@ -63,9 +104,9 @@ export default function SettingComponent({ session }: SettingComponentProps) {
                     {/* drop down menu for currency */}
                     {currency.isClicked &&
                       <div className="absolute top-10 left-0 right-0 w-full rounded-md bg-white shadow-md border-2 border-slate-400/50 border-solid">
-                        {currencies.map((type) => (
+                        {currencies.map((type, index) => (
                           (type !== currency.type) && (
-                            <div key={type} className={`w-full cursor-pointer hover:bg-emerald-400/50 transition duration-150 ease-in-out delay-75 border-b-2 border-slate-400/20 p-2 outline-none flex items-center gap-3`}
+                            <div key={index} className={`w-full cursor-pointer hover:bg-emerald-400/50 transition duration-150 ease-in-out delay-75 border-b-2 border-slate-400/20 p-2 outline-none flex items-center gap-3`}
                               onClick={() => handleCurrencyTypeChange(type)}
                             >
                               <span>{getIcons(type)}</span>
@@ -94,8 +135,8 @@ export default function SettingComponent({ session }: SettingComponentProps) {
               <div className="w-full flex items-center gap-5">
                 {/* Icon image */}
                 <div className="w-[40px] h-[40px] rounded-md ">
-                  {session && session.user.image ?
-                    <Image src={session.user.image} alt="icon" width={40} height={40} className="rounded-md" />
+                  {icon ?
+                    <Image src={icon} alt="icon" width={40} height={40} className="rounded-full" />
                     :
                     <FaRegUserCircle size={40} className="rounded-md" />
                   }
@@ -104,7 +145,7 @@ export default function SettingComponent({ session }: SettingComponentProps) {
                 {/* Income select button */}
                 <label>
                   <span className="p-2 rounded-lg bg-transparent border-2 border-slate-400/50 hover:bg-slate-400/50 cursor-pointer transition duration-150 ease-in-out delay-75">Select Your Icon</span>
-                  <input type="file" name="icon" className="hidden" />
+                  <input type="file" name="icon" accept="image/*" className="hidden" onChange={handleImageShow}/>
                 </label>
               </div>
             </div>
@@ -125,9 +166,9 @@ export default function SettingComponent({ session }: SettingComponentProps) {
                     {/* drop down menu for location */}
                     {location.isClicked &&
                       <div className="absolute top-10 left-0 right-0 w-full rounded-md bg-white shadow-md border-2 border-slate-400/50 border-solid">
-                        {countries.map((country) => (
+                        {countries.map((country, index) => (
                           (country !== location.name) && (
-                            <div key={country} className="w-full cursor-pointer hover:bg-emerald-400/50 transition duration-150 ease-in-out delay-75 border-b-2 border-slate-400/20 p-2 outline-none flex items-center gap-3"
+                            <div key={index} className="w-full cursor-pointer hover:bg-emerald-400/50 transition duration-150 ease-in-out delay-75 border-b-2 border-slate-400/20 p-2 outline-none flex items-center gap-3"
                               onClick={() => handleLocationNameChange(country)}
                             >
                               <span>{getIcons(country)}</span>
