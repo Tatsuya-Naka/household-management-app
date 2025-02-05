@@ -8,7 +8,7 @@ const ProfileSchema = z.object({
     location: z.enum(["Australia", "Japan", "US", "Europe"], {
         message: "Incorrect country name selected",
     }),
-    icon: z.instanceof(File).optional(),
+    icon: z.instanceof(File, {message: "Maximum file size is 10MB"}).optional(),
 });
 
 export default ProfileSchema;

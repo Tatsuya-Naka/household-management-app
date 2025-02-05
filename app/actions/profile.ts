@@ -1,11 +1,18 @@
 "use server";
 
 import { auth } from "@/auth";
+import { db } from "@/lib/db";
+import paths from "@/paths";
 import ProfileSchema from "@/schemas/profile";
+import { s3_post } from "@/server/s3";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 interface ProfileState {
   errors: {
     name?: string[];
+    currency?: string[];
+    location?: string[];
     icon?: string[];
     _form?: string[];
   },
@@ -43,17 +50,42 @@ export async function updateProfile({ type, local }: UpdateProfileProps, formSta
   }
 
   const { name, currency, location, icon } = validatedFields.data!;
+  // TODO: upload icon to s3
+  let iconUrl = "";
+  if (icon && icon.size > 0) {
+    const { success } = await s3_post({ file: icon, name: "icon" });
+    if (success && success.isSuccess) {
+      iconUrl = success.url;
+    }
+  }
 
-  console.log({ name: name });
-  console.log({ currency: currency });
-  console.log({ location: location });
-  console.log({ icon: icon });
+  try {
+    await db.user.update({
+      where: {id: session.user.id},
+      data: {
+        name: name,
+        currency: currency,
+        location: location,
+        image: iconUrl,
+      }
+    })
 
-  return {
-    errors: {},
-    success: {
-      isSuccess: true,
-      message: "Profile updated successfully",
+    revalidatePath(paths.home());
+    redirect(paths.home());
+
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        errors: {
+          _form: [error.message]
+        }
+      }
+    } else {
+      return {
+        errors: {
+          _form: ["An unknown error occurred"]
+        }
+      }
     }
   }
 }

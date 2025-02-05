@@ -15,12 +15,12 @@ interface SettingComponentProps {
 }
 
 export default function SettingComponent({ session }: SettingComponentProps) {
-  // TODO: action to save the setting
+  // TODO: cache issue in session data
   const [currency, setCurrency] = useState<{ type: string, isClicked: boolean }>({ type: session?.user.currency || "", isClicked: false })
   const [location, setLocation] = useState<{ name: string, isClicked: boolean }>({ name: session?.user.location || "", isClicked: false })
   const [icon, setIcon] = useState<string | null>(session?.user.image || null);
-  const [formState, action] = useActionState(actions.updateProfile.bind(null, {type: currency.type, local: location.name}), { errors: {} })
-  
+  const [formState, action] = useActionState(actions.updateProfile.bind(null, { type: currency.type, local: location.name }), { errors: {} })
+
   const handleCurrencyClick = () => {
     setCurrency({ ...currency, isClicked: !currency.isClicked })
   }
@@ -79,13 +79,16 @@ export default function SettingComponent({ session }: SettingComponentProps) {
 
   return (
     <div className="w-full h-full shadow-md rounded-lg">
-      <form className="px-5 py-3 relative" action={action}>
+      <form className="px-5 py-3 relative" action={action} onKeyDown={(e: React.KeyboardEvent<HTMLFormElement>) => {
+        if (e.key === "Enter") e.preventDefault();
+      }}>
         <div className="grid grid-cols-2 gap-5 my-10 mx-5">
           {/* Name */}
           <div className="col-span-1">
             <label className="flex flex-col items-start gap-1">
               <span className="text-sm font-medium">Name</span>
-              <input type="text" name="name" defaultValue={session?.user.name || ""} className="w-full border-2 border-slate-400/50 rounded-md p-2 outline-none" />
+              {formState.errors.name && <span className="text-sm font-medium text-red-500">{formState.errors.name}</span>}
+              <input type="text" name="name" defaultValue={session?.user.name || ""} className={`w-full border-2 rounded-md p-2 outline-none ${formState.errors.name ? "border-red-500" : "border-slate-400/50"}`} />
             </label>
           </div>
           {/* Currency Type */}
@@ -93,10 +96,11 @@ export default function SettingComponent({ session }: SettingComponentProps) {
             <div className="w-full mr-5">
               <div className="flex flex-col items-start gap-1">
                 <span className="text-sm font-medium">Currency Type</span>
+                {formState.errors.currency && <span className="text-sm font-medium text-red-500">{formState.errors.currency}</span>}
                 <div className="w-full flex items-center justify-center gap-5">
                   <div className="w-full relative z-20">
                     {/* currency */}
-                    <div className="w-full border-2 border-slate-400/50 rounded-md p-2 outline-none flex items-center gap-3" >
+                    <div className={`w-full border-2 rounded-md p-2 outline-none flex items-center gap-3 ${formState.errors.currency ? "border-red-500" : "border-slate-400/50"}`} >
                       <span>{getIcons(currency.type)}</span>
                       {currency.type}
                     </div>
@@ -132,6 +136,7 @@ export default function SettingComponent({ session }: SettingComponentProps) {
           <div className="col-span-1">
             <div className="flex flex-col items-start gap-1">
               <span className="text-sm font-medium">Icon</span>
+              {formState.errors.icon && <span className="text-sm font-medium text-red-500">{formState.errors.icon}</span>}
               <div className="w-full flex items-center gap-5">
                 {/* Icon image */}
                 <div className="w-[40px] h-[40px] rounded-md ">
@@ -144,8 +149,8 @@ export default function SettingComponent({ session }: SettingComponentProps) {
 
                 {/* Income select button */}
                 <label>
-                  <span className="p-2 rounded-lg bg-transparent border-2 border-slate-400/50 hover:bg-slate-400/50 cursor-pointer transition duration-150 ease-in-out delay-75">Select Your Icon</span>
-                  <input type="file" name="icon" accept="image/*" className="hidden" onChange={handleImageShow}/>
+                  <span className={`p-2 rounded-lg bg-transparent border-2 hover:bg-slate-400/50 cursor-pointer transition duration-150 ease-in-out delay-75 ${formState.errors.icon ? "border-red-500" : "border-slate-400/50"}`}>Select Your Icon</span>
+                  <input type="file" name="icon" accept="image/*" className="hidden" onChange={handleImageShow} />
                 </label>
               </div>
             </div>
@@ -156,9 +161,10 @@ export default function SettingComponent({ session }: SettingComponentProps) {
             <div className="w-full mr-5">
               <div className="flex flex-col items-start gap-1">
                 <span className="text-sm font-medium">Location</span>
+                {formState.errors.location && <span className="text-sm font-medium text-red-500">{formState.errors.location}</span>}
                 <div className="w-full flex items-center justify-center gap-5">
                   <div className="w-full relative z-10">
-                    <div className="w-full border-2 border-slate-400/50 rounded-md p-2 outline-none flex items-center gap-3" >
+                    <div className={`w-full border-2 rounded-md p-2 outline-none flex items-center gap-3 ${formState.errors.location ? "border-red-500" : "border-slate-400/50"}`} >
                       <span>{getIcons(location.name)}</span>
                       {location.name}
                     </div>

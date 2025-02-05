@@ -6,7 +6,7 @@ export default function ProfileSaveButton() {
   const { pending } = useFormStatus();
 
   return (
-    <button className={`p-2 rounded-full bg-transparent hover:bg-emerald-200/50 cursor-pointer transition duration-150 ease-in-out delay-75 ${pending ? "opacity-50 cursor-not-allowed" : ""}`}
+    <button className={`p-2 rounded-full bg-transparent hover:bg-emerald-200/50 transition duration-150 ease-in-out delay-75 ${pending ? "opacity-50 cursor-not-allowed bg-emerald-200/50" : "cursor-pointer"}`}
       type="submit"
       disabled={pending}
     >
