@@ -1,7 +1,7 @@
 // import { auth } from "@/auth";
 import EditRecordsComponent from "@/components/edit/records/edit-records";
 // import { getRecordData } from "@/data/records";
-import type { Metadata } from "next";
+// import type { Metadata } from "next";
 // import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -11,10 +11,10 @@ interface EditRecordsPageProps {
   }>
 }
 
-export const metadata: Metadata = {
-  title: "HMB - Household Management App | Record",
-  description: "Keep up with your purchase/income records",
-};
+// export const metadata: Metadata = {
+//   title: "HMB - Household Management App | Record",
+//   description: "Keep up with your purchase/income records",
+// };
 
 // export async function generateMetadata({ params }: EditRecordsPageProps): Promise<Metadata> {
 //   const { recordId } = await params;
