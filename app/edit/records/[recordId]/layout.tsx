@@ -1,9 +1,7 @@
 import { auth } from "@/auth";
-import EditRecordsComponent from "@/components/edit/records/edit-records";
 import { getRecordData } from "@/data/records";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 
 interface EditRecordsPageProps {
   params: Promise<{
