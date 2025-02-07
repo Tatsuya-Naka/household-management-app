@@ -42,19 +42,19 @@ export default function Icons({ image }: IconsProps) {
       >
         {brightness ? <CgDarkMode size={24} className='transition duration-150 rotate-180' /> : <CgDarkMode size={24} className='transition duration-150' />}
       </button>
-      <div className='relative z-10'>
+      <div className='relative z-10 w-full h-full'>
         {image ?
           <button
             type="button"
-            className="rounded-full flex items-center justify-center ml-2"
+            className="rounded-full flex items-center justify-center ml-2 shrink-0 w-[24px] h-[24px]"
             onClick={() => setIsProfile((prev) => !prev)}
           >
             <Image
               src={image}
               alt="Avatar"
-              width={40}
-              height={40}
-              className='rounded-full'
+              width={24}
+              height={24}
+              className='rounded-full w-full h-full shrink-0'
             />
           </button>
           :

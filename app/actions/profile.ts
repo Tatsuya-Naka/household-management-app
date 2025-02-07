@@ -51,11 +51,15 @@ export async function updateProfile({ type, local }: UpdateProfileProps, formSta
 
   const { name, currency, location, icon } = validatedFields.data!;
   // TODO: upload icon to s3
-  let iconUrl = "";
   if (icon && icon.size > 0) {
     const { success } = await s3_post({ file: icon, name: "icon" });
     if (success && success.isSuccess) {
-      iconUrl = success.url;
+      await db.user.update({
+        where: {id: session.user.id},
+        data: {
+          image: success.url,
+        }
+      })
     }
   }
 
@@ -66,7 +70,6 @@ export async function updateProfile({ type, local }: UpdateProfileProps, formSta
         name: name,
         currency: currency,
         location: location,
-        image: iconUrl,
       }
     })
   } catch (error) {
