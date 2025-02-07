@@ -27,7 +27,7 @@ export async function generateMetaData({ params }: EditRecordsPageProps): Promis
             title,
             description,
             url,
-            images: [{url: 'https://household-management-bucket.s3.ap-southeast-2.amazonaws.com/icon/cm4p59ynp0000z4ngvd05ehpo', width: 800, height: 600, alt: "image icon"}],
+            images: [{url: `${(record && record.object) ? record.object : "https://household-management-bucket.s3.ap-southeast-2.amazonaws.com/icon/cm4p59ynp0000z4ngvd05ehpo"}`, width: 800, height: 600, alt: "image icon"}],
             type: "website"
         };
 
@@ -43,6 +43,7 @@ export async function generateMetaData({ params }: EditRecordsPageProps): Promis
             }
         }
     } catch (err: unknown) {
+        console.log({err: err});
         return notFound();
     }
 }
