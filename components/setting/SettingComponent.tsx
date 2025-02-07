@@ -9,16 +9,18 @@ import { useActionState, useState } from "react";
 import * as actions from "@/app/actions";
 import ProfileSaveButton from "./ProfileSaveButton";
 import { countries } from "@/type/country";
+import { User } from "@prisma/client";
 
 interface SettingComponentProps {
   session: Session | null;
+  user?: User | null;
 }
 
-export default function SettingComponent({ session }: SettingComponentProps) {
+export default function SettingComponent({ session, user }: SettingComponentProps) {
   // TODO: cache issue in session data
   const [currency, setCurrency] = useState<{ type: string, isClicked: boolean }>({ type: session?.user.currency || "", isClicked: false })
   const [location, setLocation] = useState<{ name: string, isClicked: boolean }>({ name: session?.user.location || "", isClicked: false })
-  const [icon, setIcon] = useState<string | null>(session?.user.image || null);
+  const [icon, setIcon] = useState<string | null>(user?.image || null);
   const [formState, action] = useActionState(actions.updateProfile.bind(null, { type: currency.type, local: location.name }), { errors: {} })
 
   const handleCurrencyClick = () => {
@@ -88,7 +90,7 @@ export default function SettingComponent({ session }: SettingComponentProps) {
             <label className="flex flex-col items-start gap-1">
               <span className="text-sm font-medium">Name</span>
               {formState.errors.name && <span className="text-sm font-medium text-red-500">{formState.errors.name}</span>}
-              <input type="text" name="name" defaultValue={session?.user.name || ""} className={`w-full border-2 rounded-md p-2 outline-none ${formState.errors.name ? "border-red-500" : "border-slate-400/50"}`} />
+              <input type="text" name="name" defaultValue={user?.name || ""} className={`w-full border-2 rounded-md p-2 outline-none ${formState.errors.name ? "border-red-500" : "border-slate-400/50"}`} />
             </label>
           </div>
           {/* Currency Type */}
@@ -139,9 +141,9 @@ export default function SettingComponent({ session }: SettingComponentProps) {
               {formState.errors.icon && <span className="text-sm font-medium text-red-500">{formState.errors.icon}</span>}
               <div className="w-full flex items-center gap-5">
                 {/* Icon image */}
-                <div className="w-[40px] h-[40px] rounded-md ">
+                <div className="w-[40px] h-[40px] rounded-md shrink-0">
                   {icon ?
-                    <Image src={icon} alt="icon" width={40} height={40} className="rounded-full" />
+                    <Image src={icon} alt="icon" width={40} height={40} className="w-full h-full rounded-full shrink-0" />
                     :
                     <FaRegUserCircle size={40} className="rounded-md" />
                   }
