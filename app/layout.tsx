@@ -16,6 +16,9 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "HMB - Household Management App",
   description: "Manage your money with your everyday life",
+  openGraph: {
+    images: ['https://household-management-bucket.s3.ap-southeast-2.amazonaws.com/icon/cm4p59ynp0000z4ngvd05ehpo']
+  }
 };
 
 export default function RootLayout({
