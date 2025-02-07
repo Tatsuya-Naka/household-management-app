@@ -61,7 +61,7 @@ export async function updateProfile({ type, local }: UpdateProfileProps, formSta
 
   try {
     await db.user.update({
-      where: {id: session.user.id},
+      where: { id: session.user.id },
       data: {
         name: name,
         currency: currency,
@@ -69,10 +69,6 @@ export async function updateProfile({ type, local }: UpdateProfileProps, formSta
         image: iconUrl,
       }
     })
-
-    revalidatePath(paths.home());
-    redirect(paths.home());
-
   } catch (error) {
     if (error instanceof Error) {
       return {
@@ -88,4 +84,7 @@ export async function updateProfile({ type, local }: UpdateProfileProps, formSta
       }
     }
   }
+
+  revalidatePath(paths.settingPageUrl());
+  redirect(paths.settingPageUrl());
 }
