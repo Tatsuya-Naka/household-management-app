@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: EditRecordsPageProps): Promis
   }
   const data = await getRecordData({ recordId, userId: session.user.id });
   const { record } = data;
-  const title = "HMB - Household Management App"
+  const title = "HMB"
   const description = `${record?.genre || "OOkini"}`;
   const url = `https://household-management-app.vercel.app/records/${recordId}`;
   const openGraph = {
