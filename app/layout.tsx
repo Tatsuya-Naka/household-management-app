@@ -1,4 +1,4 @@
-// import type { Metadata } from "next";
+import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -14,10 +14,10 @@ const geistMono = localFont({
 });
 
 // LINE??
-// export const metadata: Metadata = {
-//   title: "HMB - Household Management App",
-//   description: "Manage your money with your everyday life",
-// };
+export const metadata: Metadata = {
+  title: "HMB - Household Management App | wow",
+  description: "Manage your money with your everyday life",
+};
 
 export default function RootLayout({
   children,
