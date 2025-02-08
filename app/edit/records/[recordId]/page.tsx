@@ -9,6 +9,11 @@ interface EditRecordsPageProps {
   }>
 }
 
+export const metadata: Metadata = {
+  title: "HMB - Household Management App | Record Page",
+  description: "Manage your money with your everyday life",
+};
+
 export const generateMetadata = async ({ params }: EditRecordsPageProps): Promise<Metadata> => {
   const { recordId } = await params;
   const data = await db.record.findUnique({ where: { id: recordId } });
