@@ -18,8 +18,8 @@ interface SettingComponentProps {
 
 export default function SettingComponent({ session, user }: SettingComponentProps) {
   // TODO: cache issue in session data
-  const [currency, setCurrency] = useState<{ type: string, isClicked: boolean }>({ type: session?.user.currency || "", isClicked: false })
-  const [location, setLocation] = useState<{ name: string, isClicked: boolean }>({ name: session?.user.location || "", isClicked: false })
+  const [currency, setCurrency] = useState<{ type: string, isClicked: boolean }>({ type: session?.user.currency || "Choose currency type", isClicked: false })
+  const [location, setLocation] = useState<{ name: string, isClicked: boolean }>({ name: session?.user.location || "Choose your location", isClicked: false })
   const [icon, setIcon] = useState<string | null>(user?.image || null);
   const [formState, action] = useActionState(actions.updateProfile.bind(null, { type: currency.type, local: location.name }), { errors: {} })
 
