@@ -56,6 +56,12 @@ const paths = {
     settingPageUrl() {
         return "/setting";
     },
+    SettingFriends() {
+        return "/setting/friends";
+    },
+    SettingAccount() {
+        return "/setting/account";
+    },
     logOutPageUrl() {
         return "/log-out";
     },

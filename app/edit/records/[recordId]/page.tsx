@@ -1,6 +1,5 @@
+// import { auth } from "@/auth";
 import EditRecordsComponent from "@/components/edit/records/edit-records";
-// import { db } from "@/lib/db";
-import { Metadata } from "next";
 import { Suspense } from "react";
 
 interface EditRecordsPageProps {
