@@ -13,8 +13,9 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+// LINE??
 export const metadata: Metadata = {
-  title: "HMB - Household Management App",
+  title: "HMB - Household Management App | wow",
   description: "Manage your money with your everyday life",
 };
 
