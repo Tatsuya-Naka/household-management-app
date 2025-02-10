@@ -15,6 +15,13 @@ export default function RecordImage() {
         const files = e.currentTarget.files;
         if (files && files.length > 0 && files[0]) {
             const file = files[0];
+            console.log("------------------------------------------- file input -------------------------------------------");
+            // Use tesseract.js to recognize characters in the image
+            const Tesseract = require('tesseract.js');
+            const { data: { text } } = await Tesseract.recognize(file, 'eng');
+
+            console.log("Recognized Text:", text);
+            console.log("------------------------------------------- -------------------------------------------")
 
             const formData = new FormData();
             formData.append("file", file);
