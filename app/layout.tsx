@@ -14,10 +14,10 @@ const geistMono = localFont({
 });
 
 // LINE??
-export const metadata: Metadata = {
-  title: "HMB - Household Management App | wow",
-  description: "Manage your money with your everyday life",
-};
+// export const metadata: Metadata = {
+//   title: "HMB - Household Management App | wow",
+//   description: "Manage your money with your everyday life",
+// };
 
 export default function RootLayout({
   children,

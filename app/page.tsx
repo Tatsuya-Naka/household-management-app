@@ -7,12 +7,40 @@ import SportsBaseballOutlinedIcon from '@mui/icons-material/SportsBaseballOutlin
 import { Poppins } from "next/font/google";
 import paths from "@/paths";
 import { cn } from "@/lib/utils";
+import { Metadata } from "next";
 
 // const font_app_name = Jaro({
 //   weight: "400",
 //   style: ["normal"],
 //   subsets: ["latin"],
 // });
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'HAB - Household Account Boook Online',
+    description: 'Manage your houhold financial status with robust security',
+    openGraph: {
+      title: 'HAB - Household Account Boook Online',
+      description: 'Manage your houhold financial status with robust security',
+      url: 'https://household-management-app.vercel.app/',
+      images: [
+        {
+          url: '/hima_pajamas.png',
+          width: 800,
+          height: 600,
+          alt: 'image himachan'
+        }
+      ],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'HAB - Household Account Book Online',
+      description: 'Manage your houhold financial status with robust security',
+      images: ['/hima_pajamas.png']
+    }
+  }
+}
 
 const font_normal = Poppins({
   weight: ["500"],

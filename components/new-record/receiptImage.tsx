@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import Tesseract from 'tesseract.js';
 import { IoReceiptOutline } from "react-icons/io5";
+import NLPCommunicationApi from "@/server/nlp";
 
 export default function RecordImage() {
   const { getValues, setValue, setError, formState: { isSubmitting } } = useFormContext();
@@ -19,11 +20,13 @@ export default function RecordImage() {
       console.log("------------------------------------------- file input -------------------------------------------");
       // Use tesseract.js to recognize characters in the image
       const { data: { text } } = await Tesseract.recognize(file, 'eng');
+      const { errors, success } = await NLPCommunicationApi({ text });
 
+      console.log("Backend: ", success.data);
       // TODO: send this text to backend with axios (Django)
       // Confirm if the data is correctly sent to backend in backend
       // Implement NLP in backend then return the result to frontend then show it with useForm hooks
-      console.log("Recognized Text:", text);
+      // console.log("Recognized Text:", text);
       console.log("------------------------------------------- -------------------------------------------")
 
       const formData = new FormData();
