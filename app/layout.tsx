@@ -1,4 +1,4 @@
-// import type { Metadata } from "next";
+import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -18,6 +18,31 @@ const geistMono = localFont({
 //   title: "HMB - Household Management App | wow",
 //   description: "Manage your money with your everyday life",
 // };
+
+export const metadata: Metadata = {
+  title: 'HAB - Household Account Book Online',
+  description: 'Manage your household financial status with robust security',
+  openGraph: {
+    title: 'HAB - Household Account Book Online',
+    description: 'Manage your household financial status with robust security',
+    url: 'https://household-management-app.vercel.app/',
+    images: [
+      {
+        url: '/hima_pajamas.png',
+        width: 800,
+        height: 600,
+        alt: 'image himachan'
+      }
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'HAB - Household Account Book Online',
+    description: 'Manage your household financial status with robust security',
+    images: ['/hima_pajamas.png']
+  }
+}
 
 export default function RootLayout({
   children,
