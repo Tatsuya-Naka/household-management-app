@@ -20,7 +20,7 @@ export default function RecordImage() {
       console.log("------------------------------------------- file input -------------------------------------------");
       // Use tesseract.js to recognize characters in the image
       const { data: { text } } = await Tesseract.recognize(file, 'eng');
-      const { errors, success } = await NLPCommunicationApi({ text });
+      const { success } = await NLPCommunicationApi({ text });
 
       console.log("Backend: ", success.data);
       // TODO: send this text to backend with axios (Django)
