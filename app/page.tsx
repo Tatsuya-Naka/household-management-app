@@ -7,7 +7,7 @@ import SportsBaseballOutlinedIcon from '@mui/icons-material/SportsBaseballOutlin
 import { Poppins } from "next/font/google";
 import paths from "@/paths";
 import { cn } from "@/lib/utils";
-import { Metadata } from "next";
+// import { Metadata } from "next";
 
 // const font_app_name = Jaro({
 //   weight: "400",
